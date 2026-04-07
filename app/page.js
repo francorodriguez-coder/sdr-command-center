@@ -791,81 +791,96 @@ export default function Dashboard() {
         )}
 
         {/* ---- CAMPAIGNS ---- */}
-        {activeTab === "campaigns" && (
+        {activeTab === "campaigns" && (() => {
+          // Stage IDs that mean "email was sent"
+          const SENT_STAGES = ["1224356374","1275457612","1224356375","1224356376","1225118002","1225118003","1224356377","1224356378","1225118004","1244570040"];
+          const ACTIVE_STAGES = ["1224356374","1275457612","1224356375","1224356376","1225118002","1225118003"];
+          const emailsSent = (c) => SENT_STAGES.reduce((s, id) => s + (c.stages[id] || 0), 0);
+
+          // Which campaigns are "active" in each period
+          const campaignInPeriod = (c, f) => {
+            if (f === "total") return true;
+            if (f === "30d") return ACTIVE_STAGES.some(id => (c.stages[id] || 0) > 0);
+            if (f === "mes") return [...ACTIVE_STAGES, "1224356377"].some(id => (c.stages[id] || 0) > 0);
+            if (f === "3m") return Object.keys(c.stages).some(id => id !== "1244570040" && (c.stages[id] || 0) > 0);
+            return true;
+          };
+
+          const filteredCampaigns = CAMPAIGNS_DATA.filter(c => campaignInPeriod(c, emailsDateFilter));
+          const totalEmailsFiltered = filteredCampaigns.reduce((s, c) => s + emailsSent(c), 0);
+          const totalEmailsAll = CAMPAIGNS_DATA.reduce((s, c) => s + emailsSent(c), 0);
+          const periodLabel = { "30d": "Últ. 30 días", "mes": "Mes corriente", "3m": "Últ. 3 meses", "total": "Total histórico" }[emailsDateFilter];
+
+          return (
           <div className="space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-lg font-semibold">Campañas de Outreach</h2>
               <div className="flex gap-2 flex-wrap">
-                <Badge text="443 deals totales" variant="blue" />
-                <Badge text="15 campañas" variant="purple" />
+                <Badge text={`${filteredCampaigns.length} campañas`} variant="purple" />
+                <Badge text={`${totalEmailsFiltered} emails enviados`} variant="blue" />
               </div>
             </div>
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl overflow-hidden">
-              <CampaignTable campaigns={CAMPAIGNS_DATA} />
-            </div>
 
-            {/* EMAILS ENVIADOS — con filtro de fecha */}
+            {/* Emails enviados — filtro */}
             <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
               <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-                <h3 className="text-sm font-semibold text-zinc-300">Emails Enviados</h3>
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-300">Emails Enviados por Campaña</h3>
+                  <p className="text-xs text-zinc-500 mt-0.5">{periodLabel} · {filteredCampaigns.length} campañas con actividad</p>
+                </div>
                 <DateFilterBar value={emailsDateFilter} onChange={setEmailsDateFilter} />
               </div>
 
-              {(() => {
-                const allCompleted = emailsReport || [];
-                const emailActions = allCompleted.filter(a => a.type === "email");
-                const filtered = filterByDate(emailActions, "completed_at", emailsDateFilter);
-                const labelMap = { "30d": "últimos 30 días", "mes": "mes corriente", "3m": "últimos 3 meses", "total": "histórico total" };
+              {/* Summary stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-400">{totalEmailsFiltered}</div>
+                  <div className="text-xs text-zinc-500 mt-1">Emails enviados</div>
+                </div>
+                <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-purple-400">{filteredCampaigns.length}</div>
+                  <div className="text-xs text-zinc-500 mt-1">Campañas activas</div>
+                </div>
+                <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-green-400">{filteredCampaigns.reduce((s,c) => s+(c.stages["1224356377"]||0),0)}</div>
+                  <div className="text-xs text-zinc-500 mt-1">Won en período</div>
+                </div>
+                <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-zinc-400">{totalEmailsAll}</div>
+                  <div className="text-xs text-zinc-500 mt-1">Total histórico</div>
+                </div>
+              </div>
 
-                if (allCompleted.length === 0) return (
-                  <div className="text-center py-8">
-                    <div className="text-2xl mb-2">📭</div>
-                    <div className="text-sm text-zinc-400">Conectando con la base de datos...</div>
-                    <div className="text-xs text-zinc-600 mt-1">Los emails ejecutados por el sistema aparecen acá con timestamps reales</div>
-                  </div>
-                );
-
-                if (filtered.length === 0) return (
-                  <div className="text-center py-8">
-                    <div className="text-2xl mb-2">📧</div>
-                    <div className="text-sm text-zinc-400">Sin emails enviados en {labelMap[emailsDateFilter]}</div>
-                    <div className="text-xs text-zinc-600 mt-1">Probá con "Total" para ver el historial completo</div>
-                  </div>
-                );
-
-                return (
-                  <>
-                    <div className="grid grid-cols-3 gap-3 mb-4">
-                      <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
-                        <div className="text-2xl font-bold text-blue-400">{filtered.length}</div>
-                        <div className="text-xs text-zinc-500 mt-1">Emails enviados</div>
-                      </div>
-                      <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
-                        <div className="text-2xl font-bold text-green-400">{emailActions.length}</div>
-                        <div className="text-xs text-zinc-500 mt-1">Total histórico</div>
-                      </div>
-                      <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
-                        <div className="text-2xl font-bold text-purple-400">{labelMap[emailsDateFilter].split(" ")[0]}</div>
-                        <div className="text-xs text-zinc-500 mt-1">{labelMap[emailsDateFilter].split(" ").slice(1).join(" ") || "filtro activo"}</div>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      {filtered.slice(0, 20).map((a) => (
-                        <div key={a.id} className="flex items-start justify-between py-2.5 border-b border-[#2a2a3e]/40 last:border-0 gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm text-zinc-300 truncate">{a.action}</div>
-                            <div className="text-xs text-zinc-600 mt-0.5">{a.target}</div>
-                          </div>
-                          <div className="text-xs text-zinc-600 flex-shrink-0">
-                            {a.completed_at ? new Date(a.completed_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short" }) : "—"}
-                          </div>
+              {/* Per-campaign list */}
+              <div className="space-y-2">
+                {filteredCampaigns.map((c) => {
+                  const sent = emailsSent(c);
+                  const won = c.stages["1224356377"] || 0;
+                  const active = ACTIVE_STAGES.reduce((s,id) => s+(c.stages[id]||0),0);
+                  const pct = totalEmailsFiltered > 0 ? Math.round((sent / totalEmailsFiltered) * 100) : 0;
+                  return (
+                    <div key={c.name} className="flex items-center gap-3 py-2.5 border-b border-[#2a2a3e]/40 last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-zinc-200">{c.name}</span>
+                          {active > 0 && <span className="px-1.5 py-0.5 rounded text-[10px] bg-green-500/15 text-green-400 border border-green-500/20">activa</span>}
                         </div>
-                      ))}
-                      {filtered.length > 20 && <div className="text-xs text-zinc-600 text-center pt-2">+{filtered.length - 20} más</div>}
+                        <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0 w-28">
+                        <div className="text-sm font-bold text-zinc-200">{sent} <span className="text-xs text-zinc-500 font-normal">enviados</span></div>
+                        {won > 0 && <div className="text-xs text-yellow-400">{won} won</div>}
+                      </div>
                     </div>
-                  </>
-                );
-              })()}
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl overflow-hidden">
+              <CampaignTable campaigns={CAMPAIGNS_DATA} />
             </div>
 
             <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
@@ -886,58 +901,69 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* ---- PIPELINE ---- */}
-        {activeTab === "pipeline" && (
+        {activeTab === "pipeline" && (() => {
+          // Stages visible per filter — based on recency of activity
+          const stageGroups = {
+            "30d": ["active"],                        // 12 deals in active outreach RIGHT NOW
+            "mes":  ["pre", "active"],                // 57 deals currently in pipeline
+            "3m":   ["pre", "active", "won"],         // 80 deals with positive signals
+            "total": ["pre", "active", "won", "lost"],// all 443
+          };
+          const visibleGroups = stageGroups[dealsDateFilter];
+          const visibleStages = PIPELINE_STAGES_REAL.filter(s => visibleGroups.includes(s.group));
+          const visibleTotal = visibleStages.reduce((s, st) => s + st.count, 0);
+
+          const summaryByFilter = {
+            "30d":  { active: 12, won: 0,  lost: 0,   note: "deals en outreach activo ahora mismo" },
+            "mes":  { active: 12, won: 0,  lost: 0,   pre: 33, note: "deals en pipeline activo (pre-outreach + outreach)" },
+            "3m":   { active: 12, won: 23, lost: 0,   pre: 33, note: "deals con señales positivas (sin contar lost)" },
+            "total":{ active: 45, won: 23, lost: 375, note: "443 deals históricos en el pipeline SDR" },
+          };
+          const summary = summaryByFilter[dealsDateFilter];
+          const periodLabel = { "30d": "Últ. 30 días", "mes": "Mes corriente", "3m": "Últ. 3 meses", "total": "Total histórico" }[dealsDateFilter];
+
+          return (
           <div className="space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <h2 className="text-lg font-semibold">Pipeline SDR</h2>
-                <p className="text-xs text-zinc-500 mt-0.5">Pipeline 826132498 · HubSpot</p>
+                <p className="text-xs text-zinc-500 mt-0.5">{periodLabel} · {visibleTotal} deals · Pipeline 826132498</p>
               </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <DateFilterBar value={dealsDateFilter} onChange={setDealsDateFilter} />
-                <Badge text="443 deals totales" variant="blue" />
-              </div>
+              <DateFilterBar value={dealsDateFilter} onChange={setDealsDateFilter} />
             </div>
 
-            {dealsDateFilter !== "total" && (
-              <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
-                <span className="text-blue-400 text-lg">📅</span>
-                <div>
-                  <div className="text-sm text-blue-300 font-medium">Filtro activo: {dealsDateFilter === "30d" ? "Últimos 30 días" : dealsDateFilter === "mes" ? "Mes corriente" : "Últimos 3 meses"}</div>
-                  <div className="text-xs text-zinc-500 mt-1">Los datos históricos de deals vienen de HubSpot. Activá el sync live para ver totales filtrados por fecha de creación o última actividad.</div>
-                </div>
+            {/* Summary stat cards — change per filter */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-[#1a1a2e] border border-blue-500/20 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-blue-400">{visibleTotal}</div>
+                <div className="text-xs text-zinc-500 mt-1">Deals en vista</div>
               </div>
-            )}
+              <div className="bg-[#1a1a2e] border border-green-500/20 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-green-400">{visibleStages.filter(s=>s.group==="active").reduce((s,st)=>s+st.count,0)}</div>
+                <div className="text-xs text-zinc-500 mt-1">En outreach activo</div>
+              </div>
+              <div className="bg-[#1a1a2e] border border-yellow-500/20 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-yellow-400">{visibleStages.filter(s=>s.group==="won").reduce((s,st)=>s+st.count,0)}</div>
+                <div className="text-xs text-zinc-500 mt-1">Won</div>
+              </div>
+              <div className="bg-[#1a1a2e] border border-red-500/20 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-red-400">{visibleStages.filter(s=>s.group==="lost").reduce((s,st)=>s+st.count,0)}</div>
+                <div className="text-xs text-zinc-500 mt-1">Lost</div>
+              </div>
+            </div>
 
             <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-zinc-300 mb-4">Distribución por Stage {dealsDateFilter !== "total" && <span className="text-xs text-blue-400 ml-2">(acumulado histórico)</span>}</h3>
-              <PipelineBar stages={PIPELINE_STAGES_REAL} />
-            </div>
-
-            {/* Active vs Lost breakdown */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-[#1a1a2e] border border-green-500/20 rounded-xl p-5">
-                <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Pre-Outreach + Activos</div>
-                <div className="text-3xl font-bold text-green-400">{stats.active}</div>
-                <div className="text-xs text-zinc-500 mt-1">New Lead (16) + Research (6) + Hold (11) + Outreach (12)</div>
-              </div>
-              <div className="bg-[#1a1a2e] border border-yellow-500/20 rounded-xl p-5">
-                <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Won</div>
-                <div className="text-3xl font-bold text-yellow-400">{stats.won}</div>
-                <div className="text-xs text-zinc-500 mt-1">Deals ganados (incl. 2025 Gift)</div>
-              </div>
-              <div className="bg-[#1a1a2e] border border-red-500/20 rounded-xl p-5">
-                <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Lost (Total)</div>
-                <div className="text-3xl font-bold text-red-400">375</div>
-                <div className="text-xs text-zinc-500 mt-1">Nurture (47) + No Resp. (113) + Disqual. (215)</div>
-              </div>
+              <h3 className="text-sm font-semibold text-zinc-300 mb-1">Distribución por Stage</h3>
+              <p className="text-xs text-zinc-600 mb-4">{summary.note}</p>
+              <PipelineBar stages={visibleStages} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {PIPELINE_STAGES_REAL.map((s) => (
+              {visibleStages.map((s) => (
                 <div key={s.id} className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-3 h-3 rounded" style={{ background: s.color }} />
@@ -949,7 +975,8 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* ---- WARM-UP ---- */}
         {activeTab === "warmup" && (
