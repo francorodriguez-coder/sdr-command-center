@@ -527,6 +527,10 @@ export default function Dashboard() {
               {apiStatus === "connected" && <span className="ml-2 text-green-400">&middot; DB live</span>}
             </div>
             <div className="text-xs text-zinc-600">443 deals SDR &middot; 15 campanas</div>
+            <a href="/graph"
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-500/15 text-purple-400 border border-purple-500/30 hover:bg-purple-500/25 transition-colors">
+              🧠 Ecosistema
+            </a>
             {displayActions.length > 0 && (
               <button onClick={() => setActiveTab("actions")}
                 className="relative px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 transition-colors">
