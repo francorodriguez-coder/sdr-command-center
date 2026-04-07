@@ -336,6 +336,128 @@ function ActivityFeed({ items }) {
   );
 }
 
+// ============================================================
+// ACTION PREVIEW — renders output preview per action type
+// ============================================================
+function ActionPreview({ type, metadata }) {
+  let meta = {};
+  try { meta = typeof metadata === "string" ? JSON.parse(metadata || "{}") : (metadata || {}); } catch {}
+
+  const empty = !meta || Object.keys(meta).length === 0;
+
+  const wrapper = (label, color, children) => (
+    <div className={`bg-[#0d0d1a] border rounded-lg p-4 space-y-2`} style={{ borderColor: color + "33" }}>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color }}>{label}</span>
+      </div>
+      {children}
+    </div>
+  );
+
+  if (type === "email") return wrapper("Preview — Email Draft", "#3b82f6",
+    empty
+      ? <p className="text-xs text-zinc-600 italic">El draft se genera al ejecutar. Podés agregar instrucciones abajo para guiar el tono y contenido.</p>
+      : <>
+          {meta.to && <div className="text-xs"><span className="text-zinc-500">Para:</span> <span className="text-zinc-300 ml-1">{meta.to}</span></div>}
+          {meta.from && <div className="text-xs"><span className="text-zinc-500">De:</span> <span className="text-zinc-300 ml-1">{meta.from}</span></div>}
+          {meta.subject && <div className="text-xs"><span className="text-zinc-500">Asunto:</span> <span className="text-zinc-200 font-medium ml-1">{meta.subject}</span></div>}
+          {meta.body && <div className="mt-2 p-3 bg-[#12121a] rounded-lg text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed border-l-2 border-blue-500/40">{meta.body}</div>}
+        </>
+  );
+
+  if (type === "asana") return wrapper("Preview — Tarea Asana", "#f97316",
+    empty
+      ? <p className="text-xs text-zinc-600 italic">La tarea se crea al ejecutar. Podés especificar asignado, fecha y proyecto en las instrucciones.</p>
+      : <>
+          {meta.task_name && <div className="text-xs"><span className="text-zinc-500">Tarea:</span> <span className="text-zinc-200 font-medium ml-1">{meta.task_name}</span></div>}
+          {meta.project && <div className="text-xs"><span className="text-zinc-500">Proyecto:</span> <span className="text-zinc-300 ml-1">{meta.project}</span></div>}
+          {meta.assignee && <div className="text-xs"><span className="text-zinc-500">Asignado a:</span> <span className="text-zinc-300 ml-1">{meta.assignee}</span></div>}
+          {meta.due_date && <div className="text-xs"><span className="text-zinc-500">Vencimiento:</span> <span className="text-zinc-300 ml-1">{meta.due_date}</span></div>}
+          {meta.notes && <div className="mt-2 p-2 bg-[#12121a] rounded text-xs text-zinc-400 leading-relaxed">{meta.notes}</div>}
+        </>
+  );
+
+  if (type === "notion") return wrapper("Preview — Página Notion", "#a1a1aa",
+    empty
+      ? <p className="text-xs text-zinc-600 italic">La página se crea al ejecutar. Podés indicar la base de datos y estructura en las instrucciones.</p>
+      : <>
+          {meta.page_title && <div className="text-xs"><span className="text-zinc-500">Título:</span> <span className="text-zinc-200 font-medium ml-1">{meta.page_title}</span></div>}
+          {meta.database && <div className="text-xs"><span className="text-zinc-500">Base de datos:</span> <span className="text-zinc-300 ml-1">{meta.database}</span></div>}
+          {meta.content && <div className="mt-2 p-2 bg-[#12121a] rounded text-xs text-zinc-400 whitespace-pre-wrap leading-relaxed">{meta.content.length > 400 ? meta.content.slice(0, 400) + "…" : meta.content}</div>}
+        </>
+  );
+
+  if (type === "slack") return wrapper("Preview — Mensaje Slack", "#a855f7",
+    empty
+      ? <p className="text-xs text-zinc-600 italic">El mensaje se redacta al ejecutar. Podés indicar canal y tono en las instrucciones.</p>
+      : <>
+          {meta.channel && <div className="text-xs"><span className="text-zinc-500">Canal:</span> <span className="text-zinc-300 ml-1">#{meta.channel}</span></div>}
+          {meta.to && <div className="text-xs"><span className="text-zinc-500">Para:</span> <span className="text-zinc-300 ml-1">@{meta.to}</span></div>}
+          {meta.message && <div className="mt-2 p-3 bg-[#1a1a2a] rounded-lg text-xs text-zinc-300 leading-relaxed border-l-[3px] border-purple-500/50">{meta.message}</div>}
+        </>
+  );
+
+  if (type === "warmup") return wrapper("Preview — LinkedIn Warm-up", "#06b6d4",
+    <div className="text-xs space-y-1">
+      {meta.person && <div><span className="text-zinc-500">Persona:</span> <span className="text-zinc-300 ml-1">{meta.person}</span></div>}
+      {meta.company && <div><span className="text-zinc-500">Empresa:</span> <span className="text-zinc-300 ml-1">{meta.company}</span></div>}
+      {meta.step && <div><span className="text-zinc-500">Etapa:</span> <span className="text-cyan-400 ml-1 font-medium">{meta.step}</span></div>}
+      {meta.linkedin_url && <div><span className="text-zinc-500">LinkedIn:</span> <span className="text-zinc-400 ml-1">{meta.linkedin_url}</span></div>}
+      {empty && <p className="text-zinc-600 italic">Acción de warm-up — se ejecuta en LinkedIn según el step del pipeline.</p>}
+    </div>
+  );
+
+  if (type === "campaign") return wrapper("Preview — Campaña SDR", "#22c55e",
+    <div className="text-xs space-y-1">
+      {meta.campaign_name && <div><span className="text-zinc-500">Campaña:</span> <span className="text-zinc-300 font-medium ml-1">{meta.campaign_name}</span></div>}
+      {meta.segment && <div><span className="text-zinc-500">Segmento:</span> <span className="text-zinc-300 ml-1">{meta.segment}</span></div>}
+      {meta.count && <div><span className="text-zinc-500">Contactos:</span> <span className="text-green-400 ml-1 font-bold">{meta.count}</span></div>}
+      {meta.description && <div className="mt-1 text-zinc-500 leading-relaxed">{meta.description}</div>}
+      {empty && <p className="text-zinc-600 italic">Se armará la campaña con los parámetros definidos al ejecutar.</p>}
+    </div>
+  );
+
+  // Generic / csat / report / planning / general
+  return wrapper("Preview — Acción", "#71717a",
+    empty
+      ? <p className="text-xs text-zinc-600 italic">Output se genera al ejecutar. Usá las instrucciones para personalizar el resultado.</p>
+      : <div className="space-y-1">
+          {Object.entries(meta).map(([k, v]) => (
+            <div key={k} className="text-xs flex gap-2">
+              <span className="text-zinc-600 capitalize">{k.replace(/_/g, " ")}:</span>
+              <span className="text-zinc-400">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
+            </div>
+          ))}
+        </div>
+  );
+}
+
+// ============================================================
+// DATE FILTER BAR
+// ============================================================
+function DateFilterBar({ value, onChange }) {
+  const opts = [
+    { id: "30d", label: "Últ. 30 días" },
+    { id: "mes", label: "Mes corriente" },
+    { id: "3m", label: "Últ. 3 meses" },
+    { id: "total", label: "Total" },
+  ];
+  return (
+    <div className="flex gap-1.5 flex-wrap">
+      {opts.map(o => (
+        <button key={o.id} onClick={() => onChange(o.id)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            value === o.id
+              ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+              : "text-zinc-500 border border-[#2a2a3e] hover:text-zinc-300 hover:border-zinc-600"
+          }`}>
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ActionQueue({ actions, onApprove, onReject }) {
   const [expanded, setExpanded] = useState(null);
   const [instructions, setInstructions] = useState({});
@@ -368,17 +490,21 @@ function ActionQueue({ actions, onApprove, onReject }) {
             <span className={`text-zinc-600 text-xs transition-transform ${expanded === a.id ? "rotate-180" : ""}`}>&#9660;</span>
           </div>
 
-          {/* Expanded: instructions panel */}
+          {/* Expanded: preview + instructions panel */}
           {expanded === a.id && (
-            <div className="px-4 pb-4 border-t border-[#2a2a3e] pt-3 space-y-3">
+            <div className="px-4 pb-4 border-t border-[#2a2a3e] pt-4 space-y-4">
+              {/* Output preview */}
+              <ActionPreview type={a.type} metadata={a.metadata} />
+
+              {/* Instructions */}
               <div>
-                <label className="text-xs text-zinc-500 uppercase tracking-wider block mb-1.5">Instrucciones para ejecutar</label>
+                <label className="text-xs text-zinc-500 uppercase tracking-wider block mb-1.5">Instrucciones / ajustes antes de ejecutar</label>
                 <textarea
                   value={instructions[a.id] || ""}
                   onChange={(e) => handleInstructionChange(a.id, e.target.value)}
-                  placeholder="Ej: 'Usar tono informal, mencionar el caso de Santillana como referencia, enviar desde mi email no el de Nico...'"
+                  placeholder="Ej: 'Usar tono informal, mencionar el caso de Santillana, enviar desde mi email...'"
                   className="w-full bg-[#12121a] border border-[#2a2a3e] rounded-lg px-3 py-2 text-sm text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-blue-500/40 resize-none"
-                  rows={3}
+                  rows={2}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -389,7 +515,7 @@ function ActionQueue({ actions, onApprove, onReject }) {
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => onApprove(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors">
-                    Aprobar con instrucciones
+                    ✓ Aprobar
                   </button>
                   <button onClick={() => onReject(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">
                     Rechazar
@@ -427,6 +553,9 @@ export default function Dashboard() {
   const [activityFeedLive, setActivityFeedLive] = useState(null);
   const [lastSyncTime, setLastSyncTime] = useState(LAST_SYNC);
   const [apiStatus, setApiStatus] = useState("loading"); // loading, connected, offline
+  const [dealsDateFilter, setDealsDateFilter] = useState("total");
+  const [emailsDateFilter, setEmailsDateFilter] = useState("total");
+  const [emailsReport, setEmailsReport] = useState(null); // live email actions from DB
 
   // ---- API Connection: Fetch actions and activity from DB ----
   const fetchActions = useCallback(async () => {
@@ -490,9 +619,39 @@ export default function Dashboard() {
     setActions((p) => p.filter((a) => a.id !== id));
   };
 
+  // Fetch completed email actions for the emails report
+  const fetchEmailsReport = useCallback(async () => {
+    try {
+      const res = await fetch("/api/actions?status=completed");
+      if (res.ok) {
+        const data = await res.json();
+        setEmailsReport(data.actions || []);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => { fetchEmailsReport(); }, [fetchEmailsReport]);
+
+  // Helper: filter records by date range
+  const filterByDate = (items, dateField, range) => {
+    if (range === "total") return items;
+    const now = new Date();
+    const start = new Date();
+    if (range === "30d") start.setDate(now.getDate() - 30);
+    else if (range === "mes") start.setDate(1);
+    else if (range === "3m") start.setMonth(now.getMonth() - 3);
+    return items.filter(i => {
+      const d = new Date(i[dateField]);
+      return !isNaN(d) && d >= start;
+    });
+  };
+
   // Merge: use DB actions if available, otherwise hardcoded
   const displayActions = dbActions?.pending?.length > 0
-    ? dbActions.pending.map((a, i) => ({ id: a.id, type: a.type, action: a.action, target: a.target, priority: a.priority }))
+    ? dbActions.pending.map((a) => ({
+        id: a.id, type: a.type, action: a.action, target: a.target,
+        priority: a.priority, metadata: a.metadata, source: a.source, created_at: a.created_at,
+      }))
     : actions;
 
   const displayActivity = activityFeedLive
@@ -634,16 +793,81 @@ export default function Dashboard() {
         {/* ---- CAMPAIGNS ---- */}
         {activeTab === "campaigns" && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Campanas de Outreach</h2>
-              <div className="flex gap-2">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h2 className="text-lg font-semibold">Campañas de Outreach</h2>
+              <div className="flex gap-2 flex-wrap">
                 <Badge text="443 deals totales" variant="blue" />
-                <Badge text="15 campanas" variant="purple" />
+                <Badge text="15 campañas" variant="purple" />
               </div>
             </div>
             <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl overflow-hidden">
               <CampaignTable campaigns={CAMPAIGNS_DATA} />
             </div>
+
+            {/* EMAILS ENVIADOS — con filtro de fecha */}
+            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+              <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+                <h3 className="text-sm font-semibold text-zinc-300">Emails Enviados</h3>
+                <DateFilterBar value={emailsDateFilter} onChange={setEmailsDateFilter} />
+              </div>
+
+              {(() => {
+                const allCompleted = emailsReport || [];
+                const emailActions = allCompleted.filter(a => a.type === "email");
+                const filtered = filterByDate(emailActions, "completed_at", emailsDateFilter);
+                const labelMap = { "30d": "últimos 30 días", "mes": "mes corriente", "3m": "últimos 3 meses", "total": "histórico total" };
+
+                if (allCompleted.length === 0) return (
+                  <div className="text-center py-8">
+                    <div className="text-2xl mb-2">📭</div>
+                    <div className="text-sm text-zinc-400">Conectando con la base de datos...</div>
+                    <div className="text-xs text-zinc-600 mt-1">Los emails ejecutados por el sistema aparecen acá con timestamps reales</div>
+                  </div>
+                );
+
+                if (filtered.length === 0) return (
+                  <div className="text-center py-8">
+                    <div className="text-2xl mb-2">📧</div>
+                    <div className="text-sm text-zinc-400">Sin emails enviados en {labelMap[emailsDateFilter]}</div>
+                    <div className="text-xs text-zinc-600 mt-1">Probá con "Total" para ver el historial completo</div>
+                  </div>
+                );
+
+                return (
+                  <>
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-400">{filtered.length}</div>
+                        <div className="text-xs text-zinc-500 mt-1">Emails enviados</div>
+                      </div>
+                      <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-green-400">{emailActions.length}</div>
+                        <div className="text-xs text-zinc-500 mt-1">Total histórico</div>
+                      </div>
+                      <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-purple-400">{labelMap[emailsDateFilter].split(" ")[0]}</div>
+                        <div className="text-xs text-zinc-500 mt-1">{labelMap[emailsDateFilter].split(" ").slice(1).join(" ") || "filtro activo"}</div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {filtered.slice(0, 20).map((a) => (
+                        <div key={a.id} className="flex items-start justify-between py-2.5 border-b border-[#2a2a3e]/40 last:border-0 gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm text-zinc-300 truncate">{a.action}</div>
+                            <div className="text-xs text-zinc-600 mt-0.5">{a.target}</div>
+                          </div>
+                          <div className="text-xs text-zinc-600 flex-shrink-0">
+                            {a.completed_at ? new Date(a.completed_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short" }) : "—"}
+                          </div>
+                        </div>
+                      ))}
+                      {filtered.length > 20 && <div className="text-xs text-zinc-600 text-center pt-2">+{filtered.length - 20} más</div>}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+
             <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-zinc-300 mb-3">Insight de Response Rate</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -667,13 +891,29 @@ export default function Dashboard() {
         {/* ---- PIPELINE ---- */}
         {activeTab === "pipeline" && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Pipeline SDR</h2>
-              <Badge text="443 deals — Pipeline 826132498" variant="blue" />
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h2 className="text-lg font-semibold">Pipeline SDR</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">Pipeline 826132498 · HubSpot</p>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <DateFilterBar value={dealsDateFilter} onChange={setDealsDateFilter} />
+                <Badge text="443 deals totales" variant="blue" />
+              </div>
             </div>
 
+            {dealsDateFilter !== "total" && (
+              <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
+                <span className="text-blue-400 text-lg">📅</span>
+                <div>
+                  <div className="text-sm text-blue-300 font-medium">Filtro activo: {dealsDateFilter === "30d" ? "Últimos 30 días" : dealsDateFilter === "mes" ? "Mes corriente" : "Últimos 3 meses"}</div>
+                  <div className="text-xs text-zinc-500 mt-1">Los datos históricos de deals vienen de HubSpot. Activá el sync live para ver totales filtrados por fecha de creación o última actividad.</div>
+                </div>
+              </div>
+            )}
+
             <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-zinc-300 mb-4">Distribucion por Stage</h3>
+              <h3 className="text-sm font-semibold text-zinc-300 mb-4">Distribución por Stage {dealsDateFilter !== "total" && <span className="text-xs text-blue-400 ml-2">(acumulado histórico)</span>}</h3>
               <PipelineBar stages={PIPELINE_STAGES_REAL} />
             </div>
 
