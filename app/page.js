@@ -556,6 +556,8 @@ export default function Dashboard() {
   const [dealsDateFilter, setDealsDateFilter] = useState("total");
   const [emailsDateFilter, setEmailsDateFilter] = useState("total");
   const [emailsReport, setEmailsReport] = useState(null); // live email actions from DB
+  const [asnCampaigns, setAsnCampaigns] = useState(null);   // live campaigns from Asana via DB
+  const [campaignsSyncedAt, setCampaignsSyncedAt] = useState(null);
 
   // ---- API Connection: Fetch actions and activity from DB ----
   const fetchActions = useCallback(async () => {
@@ -630,7 +632,25 @@ export default function Dashboard() {
     } catch {}
   }, []);
 
-  useEffect(() => { fetchEmailsReport(); }, [fetchEmailsReport]);
+  // Fetch live campaigns from Asana (via DB)
+  const fetchCampaigns = useCallback(async () => {
+    try {
+      const res = await fetch("/api/campaigns");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.campaigns?.length > 0) {
+          setAsnCampaigns(data.campaigns);
+          setCampaignsSyncedAt(data.synced_at);
+          setApiStatus("connected");
+        }
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    fetchEmailsReport();
+    fetchCampaigns();
+  }, [fetchEmailsReport, fetchCampaigns]);
 
   // Helper: filter records by date range
   const filterByDate = (items, dateField, range) => {
@@ -792,96 +812,137 @@ export default function Dashboard() {
 
         {/* ---- CAMPAIGNS ---- */}
         {activeTab === "campaigns" && (() => {
-          // Stage IDs that mean "email was sent"
-          const SENT_STAGES = ["1224356374","1275457612","1224356375","1224356376","1225118002","1225118003","1224356377","1224356378","1225118004","1244570040"];
-          const ACTIVE_STAGES = ["1224356374","1275457612","1224356375","1224356376","1225118002","1225118003"];
-          const emailsSent = (c) => SENT_STAGES.reduce((s, id) => s + (c.stages[id] || 0), 0);
+          // Use live Asana data if available, otherwise show loading
+          const campaigns = asnCampaigns || [];
 
-          // Which campaigns are "active" in each period
+          const STATUS_CONFIG = {
+            "In Progress": { color: "#22c55e", bg: "bg-green-500/15", text: "text-green-400", border: "border-green-500/20", dot: "#22c55e" },
+            "Planning":    { color: "#3b82f6", bg: "bg-blue-500/15",  text: "text-blue-400",  border: "border-blue-500/20",  dot: "#3b82f6" },
+            "On Hold":     { color: "#f97316", bg: "bg-orange-500/15",text: "text-orange-400",border: "border-orange-500/20",dot: "#f97316" },
+            "Not Started": { color: "#71717a", bg: "bg-zinc-500/10",  text: "text-zinc-500",  border: "border-zinc-700",     dot: "#71717a" },
+            "Completed":   { color: "#eab308", bg: "bg-yellow-500/15",text: "text-yellow-400",border: "border-yellow-500/20",dot: "#eab308" },
+            "Killed":      { color: "#ef4444", bg: "bg-red-500/10",   text: "text-red-400",   border: "border-red-500/20",   dot: "#ef4444" },
+          };
+
+          // Filter by status period
           const campaignInPeriod = (c, f) => {
             if (f === "total") return true;
-            if (f === "30d") return ACTIVE_STAGES.some(id => (c.stages[id] || 0) > 0);
-            if (f === "mes") return [...ACTIVE_STAGES, "1224356377"].some(id => (c.stages[id] || 0) > 0);
-            if (f === "3m") return Object.keys(c.stages).some(id => id !== "1244570040" && (c.stages[id] || 0) > 0);
+            if (f === "30d") return c.status === "In Progress";
+            if (f === "mes") return ["In Progress", "Planning"].includes(c.status);
+            if (f === "3m") return !["Not Started", "Killed"].includes(c.status);
             return true;
           };
 
-          const filteredCampaigns = CAMPAIGNS_DATA.filter(c => campaignInPeriod(c, emailsDateFilter));
-          const totalEmailsFiltered = filteredCampaigns.reduce((s, c) => s + emailsSent(c), 0);
-          const totalEmailsAll = CAMPAIGNS_DATA.reduce((s, c) => s + emailsSent(c), 0);
-          const periodLabel = { "30d": "Últ. 30 días", "mes": "Mes corriente", "3m": "Últ. 3 meses", "total": "Total histórico" }[emailsDateFilter];
+          const filtered = campaigns.filter(c => campaignInPeriod(c, emailsDateFilter));
+          const periodLabel = { "30d": "Últ. 30 días", "mes": "Mes corriente", "3m": "Últ. 3 meses", "total": "Total" }[emailsDateFilter];
+
+          const countByStatus = (status) => campaigns.filter(c => c.status === status).length;
+          const filteredCountByStatus = (status) => filtered.filter(c => c.status === status).length;
 
           return (
           <div className="space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className="text-lg font-semibold">Campañas de Outreach</h2>
-              <div className="flex gap-2 flex-wrap">
-                <Badge text={`${filteredCampaigns.length} campañas`} variant="purple" />
-                <Badge text={`${totalEmailsFiltered} emails enviados`} variant="blue" />
+              <div>
+                <h2 className="text-lg font-semibold">Campañas SDR</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Fuente: Asana · Proyecto SDR
+                  {campaignsSyncedAt && ` · Sync: ${new Date(campaignsSyncedAt).toLocaleDateString("es-AR", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" })}`}
+                </p>
               </div>
-            </div>
-
-            {/* Emails enviados — filtro */}
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
-              <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-zinc-300">Emails Enviados por Campaña</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">{periodLabel} · {filteredCampaigns.length} campañas con actividad</p>
-                </div>
+              <div className="flex items-center gap-2 flex-wrap">
                 <DateFilterBar value={emailsDateFilter} onChange={setEmailsDateFilter} />
+                <a href="https://app.asana.com/1/333378374105320/project/1213364902097317" target="_blank" rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 transition-colors">
+                  ↗ Abrir en Asana
+                </a>
               </div>
+            </div>
 
-              {/* Summary stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-                <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-blue-400">{totalEmailsFiltered}</div>
-                  <div className="text-xs text-zinc-500 mt-1">Emails enviados</div>
-                </div>
-                <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-purple-400">{filteredCampaigns.length}</div>
-                  <div className="text-xs text-zinc-500 mt-1">Campañas activas</div>
-                </div>
-                <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-green-400">{filteredCampaigns.reduce((s,c) => s+(c.stages["1224356377"]||0),0)}</div>
-                  <div className="text-xs text-zinc-500 mt-1">Won en período</div>
-                </div>
-                <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-zinc-400">{totalEmailsAll}</div>
-                  <div className="text-xs text-zinc-500 mt-1">Total histórico</div>
-                </div>
+            {campaigns.length === 0 ? (
+              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-12 text-center">
+                <div className="text-2xl mb-2">🔄</div>
+                <div className="text-zinc-300">Cargando campañas desde Asana...</div>
               </div>
-
-              {/* Per-campaign list */}
-              <div className="space-y-2">
-                {filteredCampaigns.map((c) => {
-                  const sent = emailsSent(c);
-                  const won = c.stages["1224356377"] || 0;
-                  const active = ACTIVE_STAGES.reduce((s,id) => s+(c.stages[id]||0),0);
-                  const pct = totalEmailsFiltered > 0 ? Math.round((sent / totalEmailsFiltered) * 100) : 0;
-                  return (
-                    <div key={c.name} className="flex items-center gap-3 py-2.5 border-b border-[#2a2a3e]/40 last:border-0">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-zinc-200">{c.name}</span>
-                          {active > 0 && <span className="px-1.5 py-0.5 rounded text-[10px] bg-green-500/15 text-green-400 border border-green-500/20">activa</span>}
-                        </div>
-                        <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
-                        </div>
+            ) : (
+              <>
+                {/* Summary stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { label: "En Progreso", status: "In Progress", cfg: STATUS_CONFIG["In Progress"] },
+                    { label: "Planificando", status: "Planning",    cfg: STATUS_CONFIG["Planning"] },
+                    { label: "En Pausa",    status: "On Hold",      cfg: STATUS_CONFIG["On Hold"] },
+                    { label: "Completadas", status: "Completed",    cfg: STATUS_CONFIG["Completed"] },
+                  ].map(({ label, status, cfg }) => (
+                    <div key={status} className={`bg-[#1a1a2e] border rounded-xl p-4 text-center ${cfg.border}`}>
+                      <div className={`text-3xl font-bold ${cfg.text}`}>
+                        {emailsDateFilter === "total" ? countByStatus(status) : filteredCountByStatus(status)}
                       </div>
-                      <div className="text-right flex-shrink-0 w-28">
-                        <div className="text-sm font-bold text-zinc-200">{sent} <span className="text-xs text-zinc-500 font-normal">enviados</span></div>
-                        {won > 0 && <div className="text-xs text-yellow-400">{won} won</div>}
-                      </div>
+                      <div className="text-xs text-zinc-500 mt-1">{label}</div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                  ))}
+                </div>
 
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl overflow-hidden">
-              <CampaignTable campaigns={CAMPAIGNS_DATA} />
-            </div>
+                {/* Campaign cards */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {filtered.map((c) => {
+                    const cfg = STATUS_CONFIG[c.status] || STATUS_CONFIG["Not Started"];
+                    return (
+                      <div key={c.id} className={`bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5 hover:border-zinc-600 transition-colors`}>
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-semibold text-zinc-100">{c.name}</span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${cfg.bg} ${cfg.text} border ${cfg.border}`}>
+                                {c.status}
+                              </span>
+                              {c.frequency && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] bg-zinc-800 text-zinc-500 border border-zinc-700">
+                                  {c.frequency}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {c.asana_url && (
+                            <a href={c.asana_url} target="_blank" rel="noopener noreferrer"
+                              className="text-zinc-600 hover:text-zinc-400 text-xs flex-shrink-0">↗</a>
+                          )}
+                        </div>
+
+                        {c.goal && (
+                          <div className="mb-2">
+                            <span className="text-[10px] text-zinc-600 uppercase tracking-wider">Goal · </span>
+                            <span className="text-xs text-zinc-400">{c.goal}</span>
+                          </div>
+                        )}
+                        {c.cta && (
+                          <div className="mb-2 p-2 bg-blue-500/5 border border-blue-500/10 rounded-lg">
+                            <span className="text-[10px] text-blue-400 uppercase tracking-wider">CTA · </span>
+                            <span className="text-xs text-zinc-400 italic">"{c.cta.slice(0, 100)}{c.cta.length > 100 ? '…' : ''}"</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#2a2a3e]">
+                          {c.due_on && (
+                            <span className="text-xs text-zinc-600">
+                              📅 {new Date(c.due_on).toLocaleDateString("es-AR", { day:"2-digit", month:"short", year:"numeric" })}
+                            </span>
+                          )}
+                          {c.assignee && (
+                            <span className="text-xs text-zinc-600">👤 {c.assignee.split(" ")[0]}</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {filtered.length === 0 && (
+                  <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-10 text-center">
+                    <div className="text-zinc-500">Sin campañas en {periodLabel}</div>
+                  </div>
+                )}
+              </>
+            )}
 
             <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-zinc-300 mb-3">Insight de Response Rate</h3>
