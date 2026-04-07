@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aerolab Ecosystem Graph</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#07070d;color:#e0e0e0;overflow:hidden;height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:#0d0d18;border-bottom:1px solid #1a1a2e;z-index:100;position:relative}
+.topbar h1{font-size:18px;font-weight:700;color:#fff}.topbar h1 span{color:#6c63ff}
+.topbar-right{display:flex;gap:12px;align-items:center}
+.org-count{font-size:12px;color:#888;padding:4px 12px;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2);border-radius:16px}
+.search-box{background:#111122;border:1px solid #2a2a4a;border-radius:8px;padding:6px 12px;color:#fff;font-size:13px;width:220px;outline:none}.search-box:focus{border-color:#6c63ff}.search-box::placeholder{color:#555}
+.layout{display:flex;height:calc(100vh - 50px)}
+.sidebar{width:280px;background:#0a0a14;border-right:1px solid #1a1a2e;overflow-y:auto;flex-shrink:0}
+.canvas-wrap{flex:1;position:relative;overflow:hidden}
+.detail-panel{width:360px;background:#0d0d18;border-left:1px solid #1a1a2e;overflow-y:auto;flex-shrink:0}
+.sidebar-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#555;padding:16px 16px 8px}
+.org-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;border-bottom:1px solid #111;transition:background .15s}
+.org-item:hover{background:rgba(108,99,255,0.06)}.org-item.active{background:rgba(108,99,255,0.12);border-left:3px solid #6c63ff}
+.org-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.org-info{flex:1;overflow:hidden}.org-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.org-meta{font-size:11px;color:#666}
+.org-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;flex-shrink:0}
+canvas{display:block}
+.canvas-controls{position:absolute;bottom:16px;right:16px;display:flex;flex-direction:column;gap:6px;z-index:10}
+.ctrl-btn{width:36px;height:36px;border-radius:8px;border:1px solid #2a2a4a;background:rgba(13,13,24,0.9);color:#bbb;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}.ctrl-btn:hover{border-color:#6c63ff;color:#fff}
+.legend{position:absolute;bottom:16px;left:16px;background:rgba(13,13,24,0.95);border:1px solid #2a2a4a;border-radius:10px;padding:12px 14px;font-size:10px;z-index:10;max-width:200px}
+.legend h4{color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;font-size:9px}
+.leg-row{display:flex;align-items:center;gap:6px;padding:2px 0;color:#999}.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}.leg-line{width:16px;height:2px;flex-shrink:0;border-radius:1px}
+.filters-bar{position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:10;flex-wrap:wrap}
+.f-btn{padding:4px 12px;border-radius:16px;border:1px solid #2a2a4a;background:rgba(13,13,24,0.9);color:#888;font-size:11px;cursor:pointer;transition:all .15s}.f-btn:hover{border-color:#6c63ff;color:#fff}.f-btn.on{background:rgba(108,99,255,0.15);border-color:#6c63ff;color:#6c63ff}
+.stats-bar{position:absolute;top:12px;right:12px;display:flex;gap:8px;z-index:10}
+.mini-stat{background:rgba(13,13,24,0.9);border:1px solid #2a2a4a;border-radius:8px;padding:6px 12px;text-align:center}.mini-stat .v{font-size:18px;font-weight:700;color:#6c63ff}.mini-stat .l{font-size:9px;color:#666;text-transform:uppercase;letter-spacing:.5px}
+.tt{position:absolute;background:rgba(13,13,24,0.95);border:1px solid #6c63ff;border-radius:6px;padding:8px 12px;font-size:11px;pointer-events:none;z-index:50;display:none;max-width:240px}.tt .tn{font-weight:700;color:#fff}.tt .ts{color:#888;font-size:10px}
+.dp-header{padding:20px;border-bottom:1px solid #1a1a2e}.dp-header h2{font-size:16px;color:#fff}.dp-header .subtitle{font-size:12px;color:#888;margin-top:2px}
+.dp-tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;margin-top:6px}
+.dp-section{padding:14px 20px;border-bottom:1px solid #111}.dp-section h3{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#555;margin-bottom:6px}.dp-section p{font-size:12px;line-height:1.5;color:#bbb}
+.conn-card{background:rgba(108,99,255,0.04);border:1px solid rgba(108,99,255,0.12);border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:border-color .15s}.conn-card:hover{border-color:#6c63ff}.conn-card .cn{font-weight:600;color:#fff;font-size:12px}.conn-card .cm{font-size:10px;color:#777}
+/* Loading overlay */
+#loadingOverlay{position:fixed;inset:0;background:#07070d;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+#loadingOverlay .spin{width:40px;height:40px;border:3px solid #1a1a2e;border-top-color:#6c63ff;border-radius:50%;animation:spin .8s linear infinite}
+#loadingOverlay p{color:#555;font-size:13px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="loadingOverlay">
+  <div class="spin"></div>
+  <p>Cargando ecosistema...</p>
+</div>
+
+<div class="topbar">
+  <h1><span>Aerolab</span> Ecosystem Graph</h1>
+  <div class="topbar-right">
+    <div class="org-count" id="orgCountLabel">— orgs</div>
+    <input class="search-box" id="searchBox" placeholder="Search people, orgs..." />
+  </div>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-title">Organizations</div>
+    <div id="orgList"></div>
+    <div class="sidebar-title" style="margin-top:16px">Aerolab Team Hub</div>
+    <div id="aeroTeamList"></div>
+  </div>
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="graph"></canvas>
+    <div class="tt" id="tooltip"></div>
+    <div class="filters-bar" id="filtersBar"></div>
+    <div class="stats-bar">
+      <div class="mini-stat"><div class="v" id="statPeople">—</div><div class="l">People</div></div>
+      <div class="mini-stat"><div class="v" id="statOrgs">—</div><div class="l">Orgs</div></div>
+      <div class="mini-stat"><div class="v" id="statConns">—</div><div class="l">Connections</div></div>
+    </div>
+    <div class="legend">
+      <h4>Nodes</h4>
+      <div class="leg-row"><div class="leg-dot" style="background:#6c63ff"></div>Aerolab (hub)</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#ff6b6b"></div>Staff — HOT</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#ffa500"></div>Staff — WARM</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#2a7a2a"></div>Staff — other</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#e8c547"></div>Board member</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#4a9eff"></div>Fellow / alumni</div>
+      <h4 style="margin-top:8px">Edges</h4>
+      <div class="leg-row"><div class="leg-line" style="background:#6c63ff"></div>Aerolab connection</div>
+      <div class="leg-row"><div class="leg-line" style="background:#ff6b6b"></div>Hierarchy</div>
+      <div class="leg-row"><div class="leg-line" style="background:#e8c547"></div>Board link</div>
+    </div>
+    <div class="canvas-controls">
+      <button class="ctrl-btn" id="zoomIn" title="Zoom in">+</button>
+      <button class="ctrl-btn" id="zoomOut" title="Zoom out">&#8722;</button>
+      <button class="ctrl-btn" id="resetView" title="Reset">&#x27F2;</button>
+    </div>
+  </div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="dp-header"><h2 id="dpName">Select a node</h2><div class="subtitle" id="dpSubtitle">Click any person in the graph</div></div>
+    <div id="dpContent"><div class="dp-section"><p style="color:#555">Select any person to see their profile, connections, and buying role. Select an org in the sidebar to filter.</p></div></div>
+  </div>
+</div>
+
+<script>
+// ── Global state ──────────────────────────────────────────────────────────────
+let ORGS_DATA = [], PEOPLE_DATA = [], EDGES_DATA = [], AERO_TEAM = [], ORG_DETAILS = {};
+const allNodes = [];
+const nodeMap = {};
+let zoom = 1, panX = 0, panY = 0;
+let activeOrg = null, activeFilter = 'all', searchQuery = '';
+let hoveredNode = null, selectedNode = null, dragNode = null, isPanning = false;
+let panStartX = 0, panStartY = 0;
+let W, H, dpr;
+const PALETTE = ["#ff6b6b","#ffa500","#34c759","#4a9eff","#e8c547","#ff85c8","#00d4aa","#c084fc","#f97316","#06b6d4"];
+
+// ── Fetch data then boot ──────────────────────────────────────────────────────
+async function initGraph() {
+  try {
+    const res = await fetch('/api/graph');
+    const data = await res.json();
+    ORGS_DATA   = data.orgs    || [];
+    PEOPLE_DATA = data.people  || [];
+    EDGES_DATA  = data.edges   || [];
+    AERO_TEAM   = data.aeroTeam || [];
+    ORG_DETAILS = data.orgDetails || {};
+  } catch (e) {
+    console.error('Failed to load graph data', e);
+  }
+
+  // Update stats
+  const totalPeople = AERO_TEAM.length + PEOPLE_DATA.length;
+  document.getElementById('statPeople').textContent = totalPeople;
+  document.getElementById('statOrgs').textContent   = ORGS_DATA.length;
+  document.getElementById('statConns').textContent  = EDGES_DATA.filter(e => e.type === 'aerolab').length;
+  document.getElementById('orgCountLabel').textContent = ORGS_DATA.length + ' orgs';
+
+  // Build nodes
+  AERO_TEAM.forEach(a => { const n = {...a, group:'aerolab', org:'aerolab', tier:'aero', score:0}; allNodes.push(n); nodeMap[n.id] = n; });
+  PEOPLE_DATA.forEach(p => { allNodes.push(p); nodeMap[p.id] = p; });
+
+  // Build org sidebar
+  const orgList = document.getElementById('orgList');
+  ORGS_DATA.forEach(o => {
+    const peopleCount = PEOPLE_DATA.filter(p => p.org === o.id).length;
+    const badge = o.dealValue > 0
+      ? `<div class="org-badge" style="background:rgba(52,199,89,0.15);color:#34c759;border:1px solid rgba(52,199,89,0.3)">$${o.dealValue >= 1000 ? Math.round(o.dealValue/1000)+'K' : o.dealValue}</div>`
+      : '';
+    const el = document.createElement('div');
+    el.className = 'org-item';
+    el.dataset.org = o.id;
+    el.innerHTML = `<div class="org-dot" style="background:${o.color||'#888'}"></div>
+      <div class="org-info"><div class="org-name">${o.name}</div>
+      <div class="org-meta">${peopleCount} people &bull; ${o.type||'client'}</div></div>${badge}`;
+    el.addEventListener('click', () => {
+      if (activeOrg === o.id) { activeOrg = null; el.classList.remove('active'); }
+      else { document.querySelectorAll('.org-item').forEach(x => x.classList.remove('active')); el.classList.add('active'); activeOrg = o.id; }
+    });
+    orgList.appendChild(el);
+  });
+
+  // Build aero team sidebar
+  const atl = document.getElementById('aeroTeamList');
+  AERO_TEAM.forEach(a => {
+    const conns = EDGES_DATA.filter(e => e.from === a.id || e.to === a.id);
+    const bridgedOrgs = new Set();
+    conns.forEach(e => {
+      const oid = e.from === a.id ? e.to : e.from;
+      const o = nodeMap[oid]; if (o && o.org !== 'aerolab') bridgedOrgs.add(o.org);
+    });
+    const d = document.createElement('div');
+    d.className = 'org-item';
+    d.innerHTML = `<div class="org-dot" style="background:#6c63ff"></div><div class="org-info"><div class="org-name" style="font-size:12px">${a.name}</div><div class="org-meta">${a.title} &bull; ${bridgedOrgs.size} orgs</div></div>`;
+    d.onclick = () => selectNode(nodeMap[a.id]);
+    atl.appendChild(d);
+  });
+
+  // Filters
+  const filterGroups = ['all','staff','board','fellows','aerolab'];
+  const fb = document.getElementById('filtersBar');
+  filterGroups.forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'f-btn' + (g === 'all' ? ' on' : '');
+    b.textContent = g.charAt(0).toUpperCase() + g.slice(1);
+    b.onclick = () => { document.querySelectorAll('.f-btn').forEach(x => x.classList.remove('on')); b.classList.add('on'); activeFilter = g; };
+    fb.appendChild(b);
+  });
+
+  document.getElementById('searchBox').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); });
+
+  // Canvas
+  const canvas = document.getElementById('graph');
+  const ctx = canvas.getContext('2d');
+  const tooltip = document.getElementById('tooltip');
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    const wrap = document.getElementById('canvasWrap');
+    const rect = wrap.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  // Position nodes in clusters
+  function initPositions() {
+    const clientOrgs = ORGS_DATA;
+    const angleStep = (Math.PI * 2) / Math.max(clientOrgs.length, 1);
+    const centers = { aerolab: { x: W/2, y: H/2 } };
+    clientOrgs.forEach((o, i) => {
+      const a = angleStep * i - Math.PI/2;
+      const r = Math.min(W, H) * 0.28;
+      centers[o.id] = { x: W/2 + Math.cos(a)*r, y: H/2 + Math.sin(a)*r };
+    });
+    allNodes.forEach(n => {
+      const c = centers[n.org] || centers.aerolab;
+      n.x = c.x + (Math.random()-0.5)*160;
+      n.y = c.y + (Math.random()-0.5)*160;
+      n.vx = 0; n.vy = 0;
+    });
+  }
+  initPositions();
+
+  function nodeColor(n) {
+    if (n.group==='aerolab') return '#6c63ff';
+    if (n.group==='board') return '#e8c547';
+    if (n.group==='fellows') return '#4a9eff';
+    if (n.tier==='hot') return '#ff6b6b';
+    if (n.tier==='warm') return '#ffa500';
+    if (n.tier==='cold') return '#4a9eff';
+    return '#2a7a2a';
+  }
+  function nodeRadius(n) {
+    if (n.group==='aerolab') return n.title==='CEO' ? 16 : 9;
+    if (n.group==='board') return 7;
+    if (n.group==='fellows') return 7;
+    if (n.tier==='hot') return 14;
+    if (n.tier==='warm') return 11;
+    return 6;
+  }
+  function isVis(n) {
+    if (activeOrg && n.org !== activeOrg && n.org !== 'aerolab') return false;
+    if (activeFilter !== 'all' && n.group !== activeFilter) return false;
+    if (searchQuery) return n.name.toLowerCase().includes(searchQuery) || (n.title||'').toLowerCase().includes(searchQuery) || (n.org||'').toLowerCase().includes(searchQuery);
+    return true;
+  }
+  function toWorld(x,y) { return { x:(x-panX)/zoom, y:(y-panY)/zoom }; }
+
+  function applyForces() {
+    const vis = allNodes.filter(isVis);
+    for (let i=0;i<vis.length;i++) for (let j=i+1;j<vis.length;j++) {
+      const a=vis[i],b=vis[j]; let dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy||1,d=Math.sqrt(d2);
+      let f=2500/d2; a.vx+=dx/d*f; a.vy+=dy/d*f; b.vx-=dx/d*f; b.vy-=dy/d*f;
+    }
+    EDGES_DATA.forEach(e => {
+      const a=nodeMap[e.from],b=nodeMap[e.to]; if(!a||!b||!isVis(a)||!isVis(b)) return;
+      let dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1;
+      let t=e.type==='aerolab'?200:e.type==='hierarchy'?70:120;
+      let f=(d-t)*0.0004; a.vx+=dx*f; a.vy+=dy*f; b.vx-=dx*f; b.vy-=dy*f;
+    });
+    vis.forEach(n => { if(n===dragNode) return; n.vx*=0.82; n.vy*=0.82; n.x+=n.vx; n.y+=n.vy; });
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,W,H); ctx.save(); ctx.translate(panX,panY); ctx.scale(zoom,zoom);
+    EDGES_DATA.forEach(e => {
+      const a=nodeMap[e.from],b=nodeMap[e.to]; if(!a||!b||(!isVis(a)&&!isVis(b))) return;
+      const hl=hoveredNode&&(e.from===hoveredNode.id||e.to===hoveredNode.id);
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      if(e.type==='aerolab'){ ctx.strokeStyle=hl?'rgba(108,99,255,0.7)':'rgba(108,99,255,0.18)'; ctx.lineWidth=(e.strength||10)/12; }
+      else if(e.type==='hierarchy'){ ctx.strokeStyle=hl?'rgba(255,107,107,0.6)':'rgba(255,107,107,0.1)'; ctx.lineWidth=1.2; }
+      else if(e.type==='board'){ ctx.strokeStyle=hl?'rgba(232,197,71,0.5)':'rgba(232,197,71,0.08)'; ctx.lineWidth=0.8; }
+      else{ ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=0.5; }
+      ctx.stroke();
+    });
+    allNodes.forEach(n => {
+      if(!isVis(n)) return; const r=nodeRadius(n),col=nodeColor(n);
+      if(n.tier==='hot'||n.group==='aerolab'){ const g=ctx.createRadialGradient(n.x,n.y,r*0.5,n.x,n.y,r*2); g.addColorStop(0,col+'20'); g.addColorStop(1,'transparent'); ctx.beginPath(); ctx.arc(n.x,n.y,r*2,0,Math.PI*2); ctx.fillStyle=g; ctx.fill(); }
+      ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+      if(n===selectedNode){ ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke(); }
+      if(r>=6){ ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font=`${r>=14?11:r>=9?10:9}px -apple-system,sans-serif`; ctx.textAlign='center'; ctx.fillText(n.name.split(' ')[0],n.x,n.y+r+12); }
+    });
+    ctx.restore(); applyForces(); requestAnimationFrame(draw);
+  }
+
+  function getNodeAt(mx,my) {
+    const w=toWorld(mx,my); let found=null,minD=Infinity;
+    allNodes.forEach(n => { if(!isVis(n)) return; const dx=w.x-n.x,dy=w.y-n.y,d=Math.sqrt(dx*dx+dy*dy); if(d<nodeRadius(n)+6&&d<minD){ found=n; minD=d; } });
+    return found;
+  }
+
+  canvas.addEventListener('mousemove', e => {
+    const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    if(dragNode){ const w=toWorld(mx,my); dragNode.x=w.x; dragNode.y=w.y; dragNode.vx=0; dragNode.vy=0; return; }
+    if(isPanning){ panX=mx-panStartX; panY=my-panStartY; return; }
+    hoveredNode=getNodeAt(mx,my); canvas.style.cursor=hoveredNode?'pointer':'grab';
+    if(hoveredNode){
+      tooltip.style.display='block'; tooltip.style.left=(mx+14)+'px'; tooltip.style.top=(my-8)+'px';
+      const orgObj=ORGS_DATA.find(o=>o.id===hoveredNode.org);
+      tooltip.innerHTML=`<div class="tn">${hoveredNode.name}</div><div class="ts">${hoveredNode.title}${orgObj?' &bull; '+orgObj.name:''}</div>${hoveredNode.score?`<div style="color:#6c63ff;font-size:10px;margin-top:3px">Score: ${hoveredNode.score}</div>`:''}`;
+    } else tooltip.style.display='none';
+  });
+
+  canvas.addEventListener('mousedown', e => {
+    const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    const n=getNodeAt(mx,my);
+    if(n){ dragNode=n; selectNode(n); } else { isPanning=true; panStartX=mx-panX; panStartY=my-panY; }
+  });
+  canvas.addEventListener('mouseup', () => { dragNode=null; isPanning=false; });
+  canvas.addEventListener('mouseleave', () => { dragNode=null; isPanning=false; tooltip.style.display='none'; });
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault(); const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    const oz=zoom; zoom*=e.deltaY<0?1.1:0.9; zoom=Math.max(0.2,Math.min(5,zoom));
+    panX=mx-(mx-panX)*(zoom/oz); panY=my-(my-panY)*(zoom/oz);
+  }, {passive:false});
+
+  document.getElementById('zoomIn').onclick=()=>{zoom=Math.min(5,zoom*1.3)};
+  document.getElementById('zoomOut').onclick=()=>{zoom=Math.max(0.2,zoom*0.7)};
+  document.getElementById('resetView').onclick=()=>{zoom=1;panX=0;panY=0};
+
+  // Hide loading overlay and start animation
+  document.getElementById('loadingOverlay').style.display = 'none';
+  draw();
+}
+
+function selectNode(node) {
+  selectedNode=node;
+  document.getElementById('dpName').textContent=node.name;
+  const orgObj=ORGS_DATA.find(o=>o.id===node.org);
+  const tc=node.tier==='hot'?'#ff6b6b':node.tier==='warm'?'#ffa500':node.group==='aerolab'?'#6c63ff':node.group==='board'?'#e8c547':'#555';
+  const tl=node.tier==='hot'?'HOT':node.tier==='warm'?'WARM':node.group==='aerolab'?'AEROLAB':node.group==='board'?'BOARD':node.group==='fellows'?'FELLOW':'COLD';
+  document.getElementById('dpSubtitle').innerHTML=`${node.title} ${orgObj?'&bull; '+orgObj.name:''}<br><span class="dp-tag" style="background:${tc}22;color:${tc};border:1px solid ${tc}44">${tl}${node.score?' ('+node.score+')':''}</span>`;
+  let h='';
+  if(node.roles) h+=`<div class="dp-section"><h3>Buying Role</h3><p style="color:${tc}">${node.roles}</p></div>`;
+  if(node.email) h+=`<div class="dp-section"><h3>Contact</h3><p>${node.email}</p>${node.linkedinUrl?'<p style="font-size:11px;color:#4a9eff;margin-top:4px">'+node.linkedinUrl+'</p>':''}</div>`;
+  if(node.location) h+=`<div class="dp-section"><h3>Location</h3><p>${node.location}</p></div>`;
+  if(node.career) h+=`<div class="dp-section"><h3>Background</h3><p>${node.career}</p></div>`;
+  if(node.meetingHrs) h+=`<div class="dp-section"><h3>Meeting Hours</h3><p style="color:#6c63ff;font-size:18px;font-weight:700">${node.meetingHrs} hrs</p></div>`;
+  const conns=EDGES_DATA.filter(e=>e.from===node.id||e.to===node.id);
+  if(conns.length){
+    h+=`<div class="dp-section"><h3>Connections (${conns.length})</h3>`;
+    conns.forEach(c=>{
+      const oid=c.from===node.id?c.to:c.from; const other=nodeMap[oid]; if(!other) return;
+      const oOrg=ORGS_DATA.find(o=>o.id===other.org);
+      const ti=c.type==='aerolab'?'🔗':c.type==='hierarchy'?'📊':c.type==='board'?'🏛':'🔄';
+      h+=`<div class="conn-card" onclick="selectNode(nodeMap['${oid}'])"><div class="cn">${other.name}</div><div class="cm">${other.title} &bull; ${oOrg?oOrg.name:other.org} &bull; ${ti} ${c.type}${c.strength?' (str: '+c.strength+')':''}</div></div>`;
+    });
+    h+='</div>';
+  }
+  if(node.group==='aerolab'){
+    const bridged=new Set(); conns.forEach(c=>{ const oid=c.from===node.id?c.to:c.from; const o=nodeMap[oid]; if(o&&o.org!=='aerolab') bridged.add(o.org); });
+    if(bridged.size){
+      h+=`<div class="dp-section"><h3>Bridges ${bridged.size} Org${bridged.size>1?'s':''}</h3>`;
+      bridged.forEach(oId=>{ const o=ORGS_DATA.find(x=>x.id===oId); if(o) h+=`<div style="display:flex;align-items:center;gap:8px;padding:4px 0"><div class="leg-dot" style="background:${o.color||'#888'}"></div><span style="font-size:12px;color:#fff">${o.name}</span></div>`; });
+      h+='</div>';
+    }
+  }
+  document.getElementById('dpContent').innerHTML=h;
+}
+
+// Boot
+initGraph();
+</script>
+</body>
+</html>
