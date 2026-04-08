@@ -1,5 +1,6 @@
 // API Route: /api/actions
 // Full lifecycle: add → pending → approved (with instructions) → completed
+//                 pending → hold (parked for later) → pending (re-activated)
 // Franco approves WITH instructions from dashboard
 // Scheduled tasks poll for approved actions, execute them, mark complete
 
@@ -24,6 +25,7 @@ export async function GET(request) {
       const grouped = {
         pending: rows.filter(a => a.status === "pending"),
         approved: rows.filter(a => a.status === "approved"),
+        hold: rows.filter(a => a.status === "hold"),
         completed: rows.filter(a => a.status === "completed").slice(0, 20),
         rejected: rows.filter(a => a.status === "rejected").slice(0, 10),
       };
@@ -31,7 +33,7 @@ export async function GET(request) {
     }
     return NextResponse.json({ status: "ok", actions: rows, total: rows.length });
   } catch (e) {
-    return NextResponse.json({ status: "ok", actions: { pending: [], approved: [], completed: [], rejected: [] }, total: 0 });
+    return NextResponse.json({ status: "ok", actions: { pending: [], approved: [], hold: [], completed: [], rejected: [] }, total: 0 });
   }
 }
 
@@ -70,6 +72,21 @@ export async function POST(request) {
       return NextResponse.json({ status: "ok" });
     }
 
+    // HOLD — Park an action for later (from pending or approved)
+    if (body.action === "hold") {
+      const reason = body.reason || null;
+      await sql`UPDATE actions SET status = 'hold', instructions = ${reason} WHERE id = ${body.actionId}`;
+      await sql`INSERT INTO activity_log (action, type, detail, source) VALUES (${`Accion en hold: ${body.actionId}`}, 'action', ${reason || 'Sin motivo'}, 'franco')`;
+      return NextResponse.json({ status: "ok" });
+    }
+
+    // UNHOLD — Move a held action back to pending
+    if (body.action === "unhold") {
+      await sql`UPDATE actions SET status = 'pending', approved_at = NULL, instructions = NULL WHERE id = ${body.actionId}`;
+      await sql`INSERT INTO activity_log (action, type, detail, source) VALUES (${`Accion reactivada: ${body.actionId}`}, 'action', 'Movida de hold a pending', 'franco')`;
+      return NextResponse.json({ status: "ok" });
+    }
+
     // REJECT
     if (body.action === "reject") {
       const reason = body.reason || null;
@@ -105,7 +122,7 @@ export async function POST(request) {
       return NextResponse.json({ status: "ok", results });
     }
 
-    return NextResponse.json({ error: "Unknown action. Use: add, approve, reject, complete, batch_add" }, { status: 400 });
+    return NextResponse.json({ error: "Unknown action. Use: add, approve, reject, hold, unhold, complete, batch_add" }, { status: 400 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

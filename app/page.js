@@ -458,7 +458,7 @@ function DateFilterBar({ value, onChange }) {
   );
 }
 
-function ActionQueue({ actions, onApprove, onReject }) {
+function ActionQueue({ actions, onApprove, onReject, onHold }) {
   const [expanded, setExpanded] = useState(null);
   const [instructions, setInstructions] = useState({});
   const typeIcons = { email: "\u2709\uFE0F", warmup: "\uD83D\uDD17", csat: "\u2B50", deal: "\uD83D\uDCC1", campaign: "\uD83D\uDE80", report: "\uD83D\uDCCA", planning: "\uD83D\uDCC5", general: "\u26A1" };
@@ -482,6 +482,9 @@ function ActionQueue({ actions, onApprove, onReject }) {
             <div className="flex gap-2">
               <button onClick={(e) => { e.stopPropagation(); onApprove(a.id, instructions[a.id]); }} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/15 text-green-400 border border-green-500/30 hover:bg-green-500/25 transition-colors">
                 Aprobar
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); onHold && onHold(a.id, instructions[a.id]); }} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20 transition-colors">
+                Hold
               </button>
               <button onClick={(e) => { e.stopPropagation(); onReject(a.id, instructions[a.id]); }} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">
                 Rechazar
@@ -516,6 +519,9 @@ function ActionQueue({ actions, onApprove, onReject }) {
                 <div className="flex gap-2">
                   <button onClick={() => onApprove(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors">
                     ✓ Aprobar
+                  </button>
+                  <button onClick={() => onHold && onHold(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20 transition-colors">
+                    Hold
                   </button>
                   <button onClick={() => onReject(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">
                     Rechazar
@@ -619,6 +625,29 @@ export default function Dashboard() {
       if (res.ok) fetchActions();
     } catch { /* offline fallback */ }
     setActions((p) => p.filter((a) => a.id !== id));
+  };
+
+  const handleHold = async (id, reason) => {
+    try {
+      const res = await fetch("/api/actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "hold", actionId: id, reason: reason || null }),
+      });
+      if (res.ok) fetchActions();
+    } catch { /* offline fallback */ }
+    setActions((p) => p.filter((a) => a.id !== id));
+  };
+
+  const handleUnhold = async (id) => {
+    try {
+      const res = await fetch("/api/actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "unhold", actionId: id }),
+      });
+      if (res.ok) fetchActions();
+    } catch { /* offline fallback */ }
   };
 
   // Fetch completed email actions for the emails report
@@ -1462,7 +1491,7 @@ export default function Dashboard() {
               </div>
             </div>
             {displayActions.length > 0 ? (
-              <ActionQueue actions={displayActions} onApprove={handleApprove} onReject={handleReject} />
+              <ActionQueue actions={displayActions} onApprove={handleApprove} onReject={handleReject} onHold={handleHold} />
             ) : (
               <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-12 text-center">
                 <div className="text-2xl mb-2">&#10003;</div>
@@ -1495,6 +1524,35 @@ export default function Dashboard() {
                   ))}
                 </div>
                 <div className="mt-3 text-xs text-zinc-600">El proximo scheduled task va a ejecutar estas acciones segun tus instrucciones.</div>
+              </div>
+            )}
+
+            {/* Hold actions — parked for later */}
+            {dbActions?.hold?.length > 0 && (
+              <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-5">
+                <h3 className="text-sm font-semibold text-orange-300 mb-3">En Hold ({dbActions.hold.length})</h3>
+                <div className="space-y-2">
+                  {dbActions.hold.map((a) => (
+                    <div key={a.id} className="flex items-start justify-between py-2 border-b border-orange-500/10 last:border-0">
+                      <div className="flex-1">
+                        <div className="text-sm text-zinc-200">{a.action}</div>
+                        <div className="text-xs text-zinc-500">{a.target}</div>
+                        {a.instructions && (
+                          <div className="mt-1.5 px-2 py-1 bg-[#12121a] rounded text-xs text-orange-300 border-l-2 border-orange-500/40">
+                            {a.instructions}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 ml-3">
+                        <Badge text="hold" variant="yellow" />
+                        <button onClick={() => handleUnhold(a.id)} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors">
+                          Reactivar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 text-xs text-zinc-600">Estas acciones estan pausadas. Usa Reactivar para moverlas a pendientes.</div>
               </div>
             )}
 
