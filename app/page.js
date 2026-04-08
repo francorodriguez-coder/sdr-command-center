@@ -1518,7 +1518,9 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center gap-2 ml-3">
                         <Badge text="aprobada" variant="green" />
-                        <span className="text-xs text-zinc-600 animate-pulse">ejecutando...</span>
+                        <button onClick={() => handleHold(a.id, "Movida desde aprobadas")} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20 transition-colors">
+                          Hold
+                        </button>
                       </div>
                     </div>
                   ))}
