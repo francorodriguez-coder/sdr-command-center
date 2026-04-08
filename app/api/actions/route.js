@@ -12,6 +12,33 @@ const API_KEY = process.env.SYNC_API_KEY || "sdr-command-center-dev";
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
+  const op = searchParams.get("op");
+  const actionId = searchParams.get("id");
+
+  // Quick operations via GET (for tools that can't POST)
+  if (op && actionId) {
+    try {
+      if (op === "hold") {
+        const reason = searchParams.get("reason") || "Movida a hold via API";
+        await sql`UPDATE actions SET status = 'hold', instructions = ${reason} WHERE id = ${actionId}`;
+        await sql`INSERT INTO activity_log (action, type, detail, source) VALUES (${`Accion en hold: ${actionId}`}, 'action', ${reason}, 'api')`;
+        return NextResponse.json({ status: "ok", op: "hold", actionId });
+      }
+      if (op === "unhold" || op === "reactivate") {
+        await sql`UPDATE actions SET status = 'pending', approved_at = NULL, instructions = NULL WHERE id = ${actionId}`;
+        await sql`INSERT INTO activity_log (action, type, detail, source) VALUES (${`Accion reactivada: ${actionId}`}, 'action', 'Movida de hold a pending', 'api')`;
+        return NextResponse.json({ status: "ok", op: "unhold", actionId });
+      }
+      if (op === "to_pending") {
+        await sql`UPDATE actions SET status = 'pending', approved_at = NULL, instructions = NULL WHERE id = ${actionId}`;
+        await sql`INSERT INTO activity_log (action, type, detail, source) VALUES (${`Accion revertida a pending: ${actionId}`}, 'action', 'Revertida via API', 'api')`;
+        return NextResponse.json({ status: "ok", op: "to_pending", actionId });
+      }
+      return NextResponse.json({ error: "Unknown op. Use: hold, unhold, reactivate, to_pending" }, { status: 400 });
+    } catch (e) {
+      return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+  }
 
   try {
     let rows;
