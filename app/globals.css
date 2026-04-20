@@ -1,38 +1,101 @@
 @import "tailwindcss";
 
 :root {
-  /* Aerolab palette — warm dark mode */
+  /* Aerolab warm dark mode — extracted from aerolab.co */
   --bg-primary: #0F0D0A;
   --bg-secondary: #14110D;
   --bg-card: #1A1713;
   --bg-card-hover: #211D18;
   --border: #2D2822;
   --border-strong: #3A342C;
+
   --text-primary: #F9F7F1;
   --text-secondary: #C7BEB1;
   --text-muted: #8A8276;
+  --text-dim: #5C5548;
+
+  /* Aerolab orange (F75000 on aerolab.co, FF5005 in app for slightly warmer rendering) */
   --accent: #FF5005;
   --accent-hover: #FF7A3C;
   --accent-soft: #FFB088;
+  --accent-50: rgba(255, 80, 5, 0.06);
+  --accent-100: rgba(255, 80, 5, 0.12);
+  --accent-200: rgba(255, 80, 5, 0.2);
+  --accent-400: rgba(255, 80, 5, 0.45);
+  --accent-600: #F75000;
+  --accent-800: #C13C00;
+
+  /* Aerolab navy secondary */
   --accent-secondary: #203B83;
   --accent-secondary-hover: #7FA0DB;
+  --accent-secondary-soft: #A8C1E8;
+
+  /* Pipeline-stage warm palette — harmonized to Aerolab */
+  --stage-pre: #C7BEB1;       /* text-secondary */
+  --stage-research: #7FA0DB;  /* accent-secondary-hover */
+  --stage-review: #FFB088;    /* accent-soft */
+  --stage-hold: #8A8276;      /* text-muted */
+  --stage-active: #FF5005;    /* accent */
+  --stage-conversation: #FF7A3C; /* accent-hover */
+  --stage-won: #7FA0DB;       /* accent-secondary-hover */
+  --stage-lost-nurture: #8A8276;
+  --stage-lost-noresp: #5C5548;
+  --stage-lost-disq: #3A342C;
+
+  /* Semantic */
+  --success: #4ADE80;
+  --warning: #FACC15;
+  --danger: #F87171;
+
+  /* Priority tags */
+  --pri-alta: #FF5005;
+  --pri-media: #FFB088;
+  --pri-baja: #8A8276;
+
+  --font-sans: var(--font-sans), -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", "SF Mono", Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
 
-body {
+html, body {
   background: var(--bg-primary);
   color: var(--text-primary);
   margin: 0;
-  font-feature-settings: "ss01", "cv11";
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Refined scrollbar — warm tones */
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
 
 ::selection {
   background: rgba(255, 80, 5, 0.35);
   color: var(--text-primary);
+}
+
+/* Typographic rhythm */
+h1, h2, h3, h4 { letter-spacing: -0.02em; }
+
+/* Tabular numbers for data */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Mono class helper */
+.font-mono, code, kbd, pre, samp {
+  font-family: var(--font-mono);
+}
+
+/* Focus ring — Aerolab orange */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

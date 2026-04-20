@@ -2,6 +2,59 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 
+// Aerolab wordmark — extracted from aerolab.co static/images/aerolab.svg
+// Stroke-safe scalable version. White "aerolab" text + orange isotype (F75000).
+function AerolabWordmark({ className = "h-5 w-auto" }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="106"
+      height="26"
+      viewBox="0 0 106 26"
+      fill="none"
+      className={className}
+      aria-label="Aerolab"
+      role="img"
+    >
+      <g clipPath="url(#aerolab-clip)">
+        <path
+          fill="currentColor"
+          d="M92.374 8.716h2.31v6.146h.047c.924-1.448 2.795-2.091 4.597-2.091 3.65 0 6.583 2.321 6.583 6.364 0 4.044-2.934 6.365-6.583 6.365-1.779 0-3.696-.69-4.597-1.953h-.046v1.768h-2.31V8.716Zm6.653 5.985c-2.703 0-4.481 1.677-4.481 4.434 0 2.276 1.34 4.435 4.481 4.435 3.119 0 4.436-2.16 4.436-4.434 0-2.758-1.756-4.435-4.436-4.435ZM91 25.315h-2.31v-1.77h-.047c-.901 1.265-2.818 1.955-4.597 1.955-3.65 0-6.584-2.322-6.584-6.368 0-4.047 2.935-6.369 6.584-6.369 1.801 0 3.672.643 4.597 2.092h.046v-1.956H91v12.416Zm-11.09-6.183c0 2.276 1.317 4.436 4.436 4.436 3.142 0 4.481-2.161 4.481-4.436 0-2.759-1.779-4.437-4.481-4.437-2.68 0-4.436 1.678-4.436 4.437Zm-58.383-2.228c.3-2.98 2.38-4.14 6.007-4.14 2.471 0 5.567.614 5.567 3.39v6.55c0 .704.324 1.023 1.04 1.023.254 0 .577-.045.808-.091v1.591a11.98 11.98 0 0 1-1.802.137c-1.155 0-1.917-.454-2.079-1.797-.923 1.228-3.188 1.933-5.151 1.933-4.02 0-4.92-2.047-4.92-3.593 0-2.183 1.317-3.298 5.198-3.707l2.633-.273c1.293-.136 2.102-.363 2.102-1.432 0-1.638-1.617-1.956-3.488-1.956-1.987 0-3.673.523-3.742 2.365h-2.172Zm9.402 1.955c-.346.386-.97.546-2.263.705l-2.61.319c-1.802.227-2.75.705-2.75 1.955 0 1.114 1.132 1.888 2.819 1.888 2.61 0 4.805-1.365 4.805-3.343v-1.524Zm6.527.955c.185 2.457 2.403 3.776 4.458 3.776 1.317 0 3.119-.433 3.904-2.116h2.45c-1.157 2.866-3.86 4.026-6.238 4.026-4.712 0-7.022-2.934-7.022-6.368 0-3.435 2.31-6.369 7.022-6.369 3.188 0 6.56 1.82 6.56 6.755v.296H37.457Zm8.686-1.774c-.346-2.16-2.055-3.365-4.228-3.365-2.125 0-4.042 1.227-4.389 3.365h8.617Zm18.624-5.276c4.712 0 7.022 2.934 7.022 6.369 0 3.434-2.31 6.368-7.022 6.368s-7.023-2.934-7.023-6.368c0-3.435 2.31-6.369 7.023-6.369Zm0 1.91c-3.35 0-4.574 2.297-4.574 4.458 0 2.16 1.224 4.458 4.574 4.458 3.35 0 4.574-2.297 4.574-4.458 0-2.16-1.225-4.458-4.574-4.458Zm-12.535-1.785h-.544c-.98 0-1.774.794-1.774 1.774v10.655h2.318V14.982l5.512.07v-2.094l-5.512-.07Zm25.547-4.173h-2.395c0 5.534-3.017 11.068-3.017 16.602h2.395c0-5.535 3.017-11.068 3.017-16.602Z"
+        />
+        <path
+          fill="#F75000"
+          d="M21.494 8.707 15.721.5 7.506 6.279l4.033 10.07c-.759.525-1.465.7-2.25.562-2.505-.436-2.892-2.053-3.36-4.876-.238-1.43-.484-2.91-1.222-4.19C3.816 6.302 2.401 5.38.38 5.028L0 7.21c1.371.238 2.231.775 2.788 1.742.537.932.74 2.153.955 3.446.229 1.376.465 2.8 1.147 4.013.83 1.48 2.144 2.357 4.02 2.683 1.214.212 2.357-.003 3.468-.655a7.138 7.138 0 0 0 1.064-.765c.317-.27.61-.566.887-.877l7.17-8.082-.005-.008Z"
+        />
+      </g>
+      <defs>
+        <clipPath id="aerolab-clip">
+          <path fill="#fff" d="M0 .5h105.911v25H0z" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
+
+// Just the orange isotype — for nav collapsed states, avatars, favicons
+function AerolabMark({ className = "h-4 w-4" }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="22"
+      height="18"
+      viewBox="0 0 22 18"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        fill="#F75000"
+        d="M21.494 8.207 15.721 0 7.506 5.779l4.033 10.07c-.759.525-1.465.7-2.25.562-2.505-.436-2.892-2.053-3.36-4.876-.238-1.43-.484-2.91-1.222-4.19C3.816 5.802 2.401 4.88.38 4.528L0 6.71c1.371.238 2.231.775 2.788 1.742.537.932.74 2.153.955 3.446.229 1.376.465 2.8 1.147 4.013.83 1.48 2.144 2.357 4.02 2.683 1.214.212 2.357-.003 3.468-.655a7.138 7.138 0 0 0 1.064-.765c.317-.27.61-.566.887-.877l7.17-8.082-.005-.008Z"
+      />
+    </svg>
+  );
+}
+
 // ============================================================
 // REAL DATA — Extracted from HubSpot, Asana, Granola, Ecosystem Graph
 // Last sync: 2026-04-20 ~15:35 UTC
@@ -9,23 +62,26 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 
 const LAST_SYNC = "20 abr 2026, 15:35";
 
+// Pipeline stages — closed Aerolab palette.
+// Pre-outreach: warm cream tones. Active: orange spectrum (hot = moving forward).
+// Won: brand orange. Lost: muted browns (less visual noise for low-value states).
 const STAGE_MAP = {
-  "1224356372": { name: "New Lead", group: "pre", color: "#71717a", order: 0 },
-  "1224356373": { name: "Research + Tagging", group: "pre", color: "#8b5cf6", order: 1 },
-  "1232050606": { name: "Ready to Ship", group: "pre", color: "#6366f1", order: 2 },
-  "1308810585": { name: "Ready to Ship by Owner", group: "pre", color: "#FF5005", order: 3 },
-  "1244737059": { name: "Hold", group: "pre", color: "#f97316", order: 4 },
-  "1282557052": { name: "On Review", group: "pre", color: "#eab308", order: 4.5 },
-  "1224356374": { name: "Initial Outreach", group: "active", color: "#22c55e", order: 5 },
-  "1275457612": { name: "1st Email Answered", group: "active", color: "#10b981", order: 6 },
-  "1224356375": { name: "Followup Sequence", group: "active", color: "#14b8a6", order: 7 },
-  "1224356376": { name: "Conversation", group: "active", color: "#06b6d4", order: 8 },
-  "1225118002": { name: "Requalification", group: "active", color: "#0ea5e9", order: 9 },
-  "1225118003": { name: "Handoff", group: "active", color: "#2563eb", order: 10 },
-  "1224356377": { name: "Won", group: "won", color: "#eab308", order: 11 },
-  "1224356378": { name: "Lost (Nurture Loop)", group: "lost", color: "#ef4444", order: 12 },
-  "1225118004": { name: "Lost (No Response)", group: "lost", color: "#dc2626", order: 13 },
-  "1244570040": { name: "Lost (Disqualified)", group: "lost", color: "#991b1b", order: 14 },
+  "1224356372": { name: "New Lead", group: "pre", color: "#C7BEB1", order: 0 },
+  "1224356373": { name: "Research + Tagging", group: "pre", color: "#A8C1E8", order: 1 },
+  "1232050606": { name: "Ready to Ship", group: "pre", color: "#7FA0DB", order: 2 },
+  "1308810585": { name: "Ready to Ship by Owner", group: "pre", color: "#203B83", order: 3 },
+  "1244737059": { name: "Hold", group: "pre", color: "#8A8276", order: 4 },
+  "1282557052": { name: "On Review", group: "pre", color: "#FFB088", order: 4.5 },
+  "1224356374": { name: "Initial Outreach", group: "active", color: "#FF7A3C", order: 5 },
+  "1275457612": { name: "1st Email Answered", group: "active", color: "#FF5005", order: 6 },
+  "1224356375": { name: "Followup Sequence", group: "active", color: "#FF5005", order: 7 },
+  "1224356376": { name: "Conversation", group: "active", color: "#F75000", order: 8 },
+  "1225118002": { name: "Requalification", group: "active", color: "#C13C00", order: 9 },
+  "1225118003": { name: "Handoff", group: "active", color: "#7FA0DB", order: 10 },
+  "1224356377": { name: "Won", group: "won", color: "#FF5005", order: 11 },
+  "1224356378": { name: "Lost (Nurture Loop)", group: "lost", color: "#8A8276", order: 12 },
+  "1225118004": { name: "Lost (No Response)", group: "lost", color: "#5C5548", order: 13 },
+  "1244570040": { name: "Lost (Disqualified)", group: "lost", color: "#3A342C", order: 14 },
 };
 
 // Real data from HubSpot SDR pipeline (826132498) — 446 deals total (refresh 20-Apr-2026)
@@ -48,13 +104,13 @@ const CAMPAIGNS_DATA = [
 ];
 
 const PIPELINE_STAGES_REAL = [
-  { id: "1282557052", name: "On Review", count: 9, color: "#eab308", group: "pre" },
-  { id: "1224356374", name: "Initial Outreach", count: 2, color: "#22c55e", group: "active" },
-  { id: "1224356375", name: "Followup Seq.", count: 4, color: "#14b8a6", group: "active" },
-  { id: "1224356377", name: "Won", count: 23, color: "#FF5005", group: "won" },
-  { id: "1224356378", name: "Lost (Nurture)", count: 45, color: "#ef4444", group: "lost" },
-  { id: "1225118004", name: "Lost (No Resp.)", count: 137, color: "#dc2626", group: "lost" },
-  { id: "1244570040", name: "Lost (Disqual.)", count: 226, color: "#991b1b", group: "lost" },
+  { id: "1282557052", name: "On Review", count: 9, color: "#FFB088", group: "pre" },
+  { id: "1224356374", name: "Initial Outreach", count: 2, color: "#FF7A3C", group: "active" },
+  { id: "1224356375", name: "Followup Seq.", count: 4, color: "#FF5005", group: "active" },
+  { id: "1224356377", name: "Won", count: 23, color: "#F75000", group: "won" },
+  { id: "1224356378", name: "Lost (Nurture)", count: 45, color: "#8A8276", group: "lost" },
+  { id: "1225118004", name: "Lost (No Resp.)", count: 137, color: "#5C5548", group: "lost" },
+  { id: "1244570040", name: "Lost (Disqual.)", count: 226, color: "#3A342C", group: "lost" },
 ];
 
 // Account Plannings from Granola
@@ -177,28 +233,51 @@ const ECOSYSTEM = {
 const PRIORIDADES = [
   { n: "1", label: "Campanas core + pipeline actualizado", color: "#FF5005", detail: "Lost SQL + Nurture Stalled SQL. Enviar emails, trackear, reportar indices de respuesta." },
   { n: "2", label: "Warm-up LinkedIn (piloto)", color: "#203B83", detail: "Batch 3/semana, tier B/C. 4 etapas: identificar > follow > engage > connect." },
-  { n: "3", label: "CSAT / NPS agresivo", color: "#eab308", detail: "Multi-canal incl. WhatsApp. Meta: completar en 2 meses. Separar CSAT de NPS." },
-  { n: "4", label: "Account Planning", color: "#22c55e", detail: "Santillana (jueves), REMAX (prox. semana). Mapeo relacional + oportunidades." },
+  { n: "3", label: "CSAT / NPS agresivo", color: "#FFB088", detail: "Multi-canal incl. WhatsApp. Meta: completar en 2 meses. Separar CSAT de NPS." },
+  { n: "4", label: "Account Planning", color: "#7FA0DB", detail: "Santillana (jueves), REMAX (prox. semana). Mapeo relacional + oportunidades." },
 ];
 
-// Pending actions (updated — warm-up pilot configured, Santillana research done)
+// Pending actions — enriched with owner, deadline, origen, deal link, estimated time.
+// Consumed by ActionQueue which groups warmup actions into a batch card.
 const INITIAL_ACTIONS = [
-  { id: 1, type: "campaign", action: "Armar campana Nurture Stalled SQL", target: "Nueva campana — SQLs que no llegaron a propuesta", priority: "alta" },
-  { id: 2, type: "email", action: "Enviar batch Lost SQL", target: "3 deals pendientes en Ready to Ship", priority: "alta" },
-  { id: 3, type: "csat", action: "Enviar WhatsApp CSAT", target: "Empatico AI, + 2 pendientes", priority: "alta" },
-  { id: 5, type: "report", action: "Actualizar reporte de campanas", target: "Indices de respuesta por campana", priority: "media" },
-  { id: 7, type: "warmup", action: "Follow a Naveed Janmohamed en LinkedIn", target: "Piloto warm-up — Asignado a Agustin", priority: "media" },
-  { id: 8, type: "warmup", action: "Follow a Amanda Zhu en LinkedIn", target: "Piloto warm-up — Asignado a Nicolas", priority: "media" },
-  { id: 9, type: "warmup", action: "Follow a Lior Alexander en LinkedIn", target: "Piloto warm-up — Asignado a Roberto", priority: "media" },
-  { id: 10, type: "email", action: "Enviar email a Hannah (Santillana)", target: "Confirmar extension proyecto a 2.5 meses", priority: "media" },
-  { id: 11, type: "planning", action: "Agendar reunion con Cris (Santillana)", target: "Presentar ballpark proposal nueva inversion", priority: "media" },
+  { id: 1, type: "campaign", action: "Armar campana Nurture Stalled SQL", target: "Nueva campana — SQLs que no llegaron a propuesta",
+    priority: "alta", owner: "Franco",  origen: "1:1 Nico", deadline: "22 abr", eta: "2 h",  linkedItem: { kind: "campaign", label: "Nurture Stalled SQL" } },
+  { id: 2, type: "email",    action: "Enviar batch Lost SQL",              target: "3 deals pendientes en Ready to Ship",
+    priority: "alta", owner: "Franco",  origen: "HubSpot",   deadline: "hoy",   eta: "30 min", linkedItem: { kind: "campaign", label: "Lost SQL · 3 deals" } },
+  { id: 3, type: "csat",     action: "Enviar WhatsApp CSAT",                target: "Empatico AI + 2 pendientes",
+    priority: "alta", owner: "Franco",  origen: "Asana",     deadline: "hoy",   eta: "20 min", linkedItem: { kind: "campaign", label: "CSAT" } },
+  { id: 5, type: "report",   action: "Actualizar reporte de campanas",      target: "Indices de respuesta por campana",
+    priority: "media", owner: "Franco", origen: "Weekly",    deadline: "24 abr", eta: "45 min" },
+  { id: 7, type: "warmup",   action: "Follow a Naveed Janmohamed en LinkedIn", target: "Piloto warm-up",
+    priority: "media", owner: "Agustin", origen: "Warm-up piloto", deadline: "hoy", eta: "2 min",
+    linkedItem: { kind: "person", label: "Naveed Janmohamed · CEO @ Unriddle" } },
+  { id: 8, type: "warmup",   action: "Follow a Amanda Zhu en LinkedIn",     target: "Piloto warm-up",
+    priority: "media", owner: "Nicolas", origen: "Warm-up piloto", deadline: "hoy", eta: "2 min",
+    linkedItem: { kind: "person", label: "Amanda Zhu · Co-Founder @ Recall AI" } },
+  { id: 9, type: "warmup",   action: "Follow a Lior Alexander en LinkedIn", target: "Piloto warm-up",
+    priority: "media", owner: "Roberto", origen: "Warm-up piloto", deadline: "hoy", eta: "2 min",
+    linkedItem: { kind: "person", label: "Lior Alexander · Founder @ Alpha Signal" } },
+  { id: 10, type: "email",   action: "Enviar email a Hannah (Santillana)",  target: "Confirmar extension proyecto a 2.5 meses",
+    priority: "media", owner: "Franco",  origen: "Granola · Account Planning", deadline: "21 abr", eta: "15 min",
+    linkedItem: { kind: "deal", label: "Santillana - Dev Adicional" } },
+  { id: 11, type: "planning",action: "Agendar reunion con Cris (Santillana)", target: "Presentar ballpark proposal nueva inversion",
+    priority: "media", owner: "Franco",  origen: "Granola · Account Planning", deadline: "25 abr", eta: "30 min",
+    linkedItem: { kind: "deal", label: "Santillana - Nueva oportunidad" } },
 ];
 
+// Activity feed — rich context format.
+// Shape: {time, type, actor, verb, target, targetType, targetId?, reason?}
+// Back-compat: older {time, action, detail, type} still render via ActivityFeed fallback.
 const ACTIVITY_FEED = [
-  { time: "15:35", action: "Pipeline refrescado", type: "sync", detail: "446 deals SDR actualizados desde HubSpot — 23 won, 6 activos, 408 lost, 9 en on review" },
-  { time: "15:30", action: "Dashboard redeployado", type: "sync", detail: "Aerolab aesthetic + data fresca del 20-abr" },
-  { time: "11:00", action: "Reporte mensual HTML", type: "sync", detail: "Generado sdr-report.html para Abril 2026 con 446 deals" },
-  { time: "abr 17", action: "Último sync previo", type: "sync", detail: "Dashboard había quedado en data del 17-abr — refresh manual requerido" },
+  { time: "hace 15 min", type: "sync", actor: "Sistema", verb: "refrescó", target: "Pipeline SDR", targetType: "pipeline", reason: "446 deals · 23 won · 6 activos · 408 lost · 9 en on review" },
+  { time: "hace 20 min", type: "deploy", actor: "Franco", verb: "redeployó", target: "SDR Command Center", targetType: "system", reason: "Aerolab wordmark + typography + paleta cerrada" },
+  { time: "hoy 11:00", type: "report", actor: "Franco", verb: "generó", target: "Reporte Abril 2026", targetType: "report", targetId: "sdr-report.html", reason: "446 deals, cohort mensual" },
+  { time: "hoy 09:42", type: "warmup", actor: "Agustín", verb: "hizo follow a", target: "Naveed Janmohamed", targetType: "person", targetId: "naveedjanmohamed" },
+  { time: "hoy 09:38", type: "warmup", actor: "Nicolás", verb: "hizo follow a", target: "Amanda Zhu", targetType: "person", targetId: "amandazhu" },
+  { time: "hoy 09:30", type: "warmup", actor: "Roberto", verb: "hizo follow a", target: "Lior Alexander", targetType: "person", targetId: "lioralexander" },
+  { time: "ayer 18:15", type: "email", actor: "Franco", verb: "envió batch", target: "Lost SQL (3 deals)", targetType: "campaign", reason: "Ready to Ship → Initial Outreach" },
+  { time: "ayer 16:04", type: "response", actor: "Jose Malaga", verb: "respondió en", target: "Santillana - Dev Adicional", targetType: "deal", reason: "Pidió ballpark para nueva oportunidad" },
+  { time: "17 abr", type: "sync", actor: "Sistema", verb: "ejecutó sync previo", target: "HubSpot + Asana", targetType: "system", reason: "443 deals — delta de 3 nuevos antes del refresh de hoy" },
 ];
 
 // ============================================================
@@ -208,14 +287,14 @@ const ACTIVITY_FEED = [
 function Badge({ text, variant = "gray" }) {
   const colors = {
     blue: "bg-[#FF5005]/15 text-[#FF7A3C]",
-    green: "bg-green-500/15 text-green-400",
-    yellow: "bg-yellow-500/15 text-yellow-400",
-    red: "bg-red-500/15 text-red-400",
+    green: "bg-[#7FA0DB]/12 text-[#7FA0DB]",
+    yellow: "bg-[#FFB088]/12 text-[#FFB088]",
+    red: "bg-[#8A8276]/15 text-[#C7BEB1]",
     purple: "bg-[#203B83]/25 text-[#7FA0DB]",
-    orange: "bg-orange-500/15 text-orange-400",
+    orange: "bg-[#FFB088]/15 text-[#FFB088]",
     gray: "bg-zinc-500/10 text-zinc-400",
-    hot: "bg-red-500/20 text-red-300",
-    warm: "bg-orange-500/20 text-orange-300",
+    hot: "bg-[#FF5005]/25 text-[#FF7A3C]",
+    warm: "bg-[#FFB088]/20 text-[#FFB088]",
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[variant] || colors.gray}`}>
@@ -298,11 +377,11 @@ function CampaignTable({ campaigns }) {
                   <span className={`text-sm font-medium ${active > 0 ? "text-[#FF7A3C]" : "text-zinc-600"}`}>{active}</span>
                 </td>
                 <td className="px-4 py-3.5 text-center">
-                  <span className={`text-sm font-medium ${won > 0 ? "text-yellow-400" : "text-zinc-600"}`}>{won}</span>
+                  <span className={`text-sm font-medium ${won > 0 ? "text-[#FFB088]" : "text-zinc-600"}`}>{won}</span>
                 </td>
                 <td className="px-4 py-3.5 text-center text-sm text-zinc-500">{lost}</td>
                 <td className="px-4 py-3.5 text-center">
-                  <span className={`text-sm font-medium ${rate > 20 ? "text-green-400" : rate > 0 ? "text-yellow-400" : "text-zinc-600"}`}>
+                  <span className={`text-sm font-medium ${rate > 20 ? "text-[#7FA0DB]" : rate > 0 ? "text-[#FFB088]" : "text-zinc-600"}`}>
                     {rate > 0 ? `${rate}%` : "-"}
                   </span>
                 </td>
@@ -315,20 +394,117 @@ function CampaignTable({ campaigns }) {
   );
 }
 
+// Human-readable relative time for activity feed.
+// "hace 3 min", "hace 2 h", "hoy 14:20", "ayer 18:04", "12 abr"
+function formatRelativeTime(ts) {
+  if (!ts) return "";
+  const date = new Date(ts);
+  if (isNaN(date.getTime())) return String(ts);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMin = Math.round(diffMs / 60000);
+  const diffHr = Math.round(diffMs / 3600000);
+  const hhmm = date.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+  if (diffMs < 0) return hhmm; // future / clock skew
+  if (diffMin < 1) return "ahora";
+  if (diffMin < 60) return `hace ${diffMin} min`;
+  if (diffHr < 6) return `hace ${diffHr} h`;
+  const sameDay = date.toDateString() === now.toDateString();
+  if (sameDay) return `hoy ${hhmm}`;
+  const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) return `ayer ${hhmm}`;
+  return date.toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+}
+
+// Actor → avatar config. Uses initials + warm palette hue.
+const ACTOR_AVATARS = {
+  "Franco":   { initials: "FR", bg: "#FF5005", fg: "#FFF5EE" },
+  "Nicolás":  { initials: "NA", bg: "#203B83", fg: "#E8EEFB" },
+  "Nicolas":  { initials: "NA", bg: "#203B83", fg: "#E8EEFB" },
+  "Nico":     { initials: "NA", bg: "#203B83", fg: "#E8EEFB" },
+  "Agustín":  { initials: "AL", bg: "#7FA0DB", fg: "#0F0D0A" },
+  "Agustin":  { initials: "AL", bg: "#7FA0DB", fg: "#0F0D0A" },
+  "Roberto":  { initials: "RG", bg: "#FF7A3C", fg: "#0F0D0A" },
+  "Milagros": { initials: "MA", bg: "#C13C00", fg: "#FFF5EE" },
+  "Cecilia":  { initials: "CG", bg: "#A8C1E8", fg: "#0F0D0A" },
+  "Sistema":  { initials: "•",  bg: "#2D2822", fg: "#C7BEB1" },
+};
+
+// Target-type → tiny icon + color.
+const TARGET_CHIP = {
+  deal:     { color: "#FF5005", symbol: "◆" },
+  campaign: { color: "#FF7A3C", symbol: "▲" },
+  person:   { color: "#A8C1E8", symbol: "●" },
+  pipeline: { color: "#FFB088", symbol: "≡" },
+  report:   { color: "#7FA0DB", symbol: "▦" },
+  system:   { color: "#8A8276", symbol: "◌" },
+};
+
+function ActorAvatar({ name, size = 24 }) {
+  const cfg = ACTOR_AVATARS[name] || { initials: (name || "?").slice(0, 2).toUpperCase(), bg: "#2D2822", fg: "#C7BEB1" };
+  return (
+    <span
+      className="rounded-full flex items-center justify-center font-semibold flex-shrink-0 font-mono"
+      style={{
+        width: size, height: size,
+        background: cfg.bg, color: cfg.fg,
+        fontSize: Math.floor(size * 0.4),
+        letterSpacing: "-0.02em",
+      }}
+      title={name}
+      aria-label={name}
+    >
+      {cfg.initials}
+    </span>
+  );
+}
+
 function ActivityFeed({ items }) {
-  const typeColors = { sync: "#FF5005", email: "#203B83", response: "#22c55e", deal: "#eab308", warmup: "#f97316", meeting: "#ec4899" };
   return (
     <div className="space-y-0">
-      {items.map((item, i) => (
-        <div key={i} className="flex gap-3 py-3 border-b border-[#2D2822]/50 last:border-0">
-          <span className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: typeColors[item.type] || "#71717a" }} />
-          <div className="flex-1 min-w-0">
-            <div className="text-sm text-zinc-300">{item.action}</div>
-            <div className="text-xs text-zinc-500 mt-0.5">{item.detail}</div>
+      {items.map((item, i) => {
+        // Back-compat: if the item only has legacy {action, detail}, render the old shape.
+        const isLegacy = !item.actor && !item.verb;
+        const chip = TARGET_CHIP[item.targetType] || TARGET_CHIP.system;
+        return (
+          <div key={i} className="flex gap-3 py-3 border-b border-[#2D2822]/50 last:border-0 group">
+            {isLegacy ? (
+              <>
+                <span className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-[#8A8276]" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-[#C7BEB1]">{item.action}</div>
+                  {item.detail && <div className="text-xs text-[#8A8276] mt-0.5">{item.detail}</div>}
+                </div>
+                <span className="text-xs text-[#5C5548] flex-shrink-0 tabular">{item.time}</span>
+              </>
+            ) : (
+              <>
+                <ActorAvatar name={item.actor} size={26} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-[#C7BEB1] leading-snug">
+                    <span className="font-medium text-[#F9F7F1]">{item.actor}</span>{" "}
+                    <span className="text-[#8A8276]">{item.verb}</span>{" "}
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md font-medium transition-colors hover:bg-[#211D18]"
+                      style={{ color: chip.color, background: `${chip.color}11`, border: `1px solid ${chip.color}22` }}
+                      title={item.targetType}
+                    >
+                      <span className="text-[10px] opacity-70" aria-hidden="true">{chip.symbol}</span>
+                      {item.target}
+                    </span>
+                  </div>
+                  {item.reason && (
+                    <div className="text-xs text-[#8A8276] mt-1 leading-relaxed pl-0.5">
+                      {item.reason}
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-[#5C5548] flex-shrink-0 tabular whitespace-nowrap pt-0.5">{item.time}</span>
+              </>
+            )}
           </div>
-          <span className="text-xs text-zinc-600 flex-shrink-0">{item.time}</span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -343,7 +519,7 @@ function ActionPreview({ type, metadata }) {
   const empty = !meta || Object.keys(meta).length === 0;
 
   const wrapper = (label, color, children) => (
-    <div className={`bg-[#0d0d1a] border rounded-lg p-4 space-y-2`} style={{ borderColor: color + "33" }}>
+    <div className={`bg-[#14110D] border rounded-lg p-4 space-y-2`} style={{ borderColor: color + "33" }}>
       <div className="flex items-center gap-2 mb-1">
         <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color }}>{label}</span>
       </div>
@@ -362,7 +538,7 @@ function ActionPreview({ type, metadata }) {
         </>
   );
 
-  if (type === "asana") return wrapper("Preview — Tarea Asana", "#f97316",
+  if (type === "asana") return wrapper("Preview — Tarea Asana", "#FFB088",
     empty
       ? <p className="text-xs text-zinc-600 italic">La tarea se crea al ejecutar. Podés especificar asignado, fecha y proyecto en las instrucciones.</p>
       : <>
@@ -374,7 +550,7 @@ function ActionPreview({ type, metadata }) {
         </>
   );
 
-  if (type === "notion") return wrapper("Preview — Página Notion", "#a1a1aa",
+  if (type === "notion") return wrapper("Preview — Página Notion", "#C7BEB1",
     empty
       ? <p className="text-xs text-zinc-600 italic">La página se crea al ejecutar. Podés indicar la base de datos y estructura en las instrucciones.</p>
       : <>
@@ -394,28 +570,28 @@ function ActionPreview({ type, metadata }) {
         </>
   );
 
-  if (type === "warmup") return wrapper("Preview — LinkedIn Warm-up", "#06b6d4",
+  if (type === "warmup") return wrapper("Preview — LinkedIn Warm-up", "#A8C1E8",
     <div className="text-xs space-y-1">
       {meta.person && <div><span className="text-zinc-500">Persona:</span> <span className="text-zinc-300 ml-1">{meta.person}</span></div>}
       {meta.company && <div><span className="text-zinc-500">Empresa:</span> <span className="text-zinc-300 ml-1">{meta.company}</span></div>}
-      {meta.step && <div><span className="text-zinc-500">Etapa:</span> <span className="text-cyan-400 ml-1 font-medium">{meta.step}</span></div>}
+      {meta.step && <div><span className="text-zinc-500">Etapa:</span> <span className="text-[#A8C1E8] ml-1 font-medium">{meta.step}</span></div>}
       {meta.linkedin_url && <div><span className="text-zinc-500">LinkedIn:</span> <span className="text-zinc-400 ml-1">{meta.linkedin_url}</span></div>}
       {empty && <p className="text-zinc-600 italic">Acción de warm-up — se ejecuta en LinkedIn según el step del pipeline.</p>}
     </div>
   );
 
-  if (type === "campaign") return wrapper("Preview — Campaña SDR", "#22c55e",
+  if (type === "campaign") return wrapper("Preview — Campaña SDR", "#FF7A3C",
     <div className="text-xs space-y-1">
       {meta.campaign_name && <div><span className="text-zinc-500">Campaña:</span> <span className="text-zinc-300 font-medium ml-1">{meta.campaign_name}</span></div>}
       {meta.segment && <div><span className="text-zinc-500">Segmento:</span> <span className="text-zinc-300 ml-1">{meta.segment}</span></div>}
-      {meta.count && <div><span className="text-zinc-500">Contactos:</span> <span className="text-green-400 ml-1 font-bold">{meta.count}</span></div>}
+      {meta.count && <div><span className="text-zinc-500">Contactos:</span> <span className="text-[#FF7A3C] ml-1 font-bold">{meta.count}</span></div>}
       {meta.description && <div className="mt-1 text-zinc-500 leading-relaxed">{meta.description}</div>}
       {empty && <p className="text-zinc-600 italic">Se armará la campaña con los parámetros definidos al ejecutar.</p>}
     </div>
   );
 
   // Generic / csat / report / planning / general
-  return wrapper("Preview — Acción", "#71717a",
+  return wrapper("Preview — Acción", "#8A8276",
     empty
       ? <p className="text-xs text-zinc-600 italic">Output se genera al ejecutar. Usá las instrucciones para personalizar el resultado.</p>
       : <div className="space-y-1">
@@ -455,48 +631,226 @@ function DateFilterBar({ value, onChange }) {
   );
 }
 
+// Type glyphs — monochrome SVGs feel less "emoji casino" than mixed Unicode faces.
+const TYPE_GLYPHS = {
+  email:    "M3.5 5.5h13v9h-13z M3.5 5.5l6.5 4.5 6.5-4.5",
+  warmup:   "M5.5 10a4.5 4.5 0 1 1 4.5 4.5v-1.5 M10 10v1.5a4.5 4.5 0 1 0 4.5-4.5",
+  csat:     "M10 3l2 5.5 5.5.2-4.4 3.4 1.6 5.3-4.7-3-4.7 3 1.6-5.3L2.5 8.7l5.5-.2z",
+  deal:     "M3 6h14v9H3z M3 6l7 5 7-5",
+  campaign: "M4 10l12-5v10zM3 10h1v3H3z",
+  report:   "M5 4h10v12H5z M7 7h6 M7 10h6 M7 13h4",
+  planning: "M5 5h10v10H5z M7 3v3 M13 3v3 M5 8h10",
+  general:  "M10 4v6l4 2",
+};
+
+const OWNER_TAG_COLOR = {
+  "Franco":  "#FF5005",
+  "Nicolas": "#203B83", "Nicolás": "#203B83", "Nico": "#203B83",
+  "Agustin": "#7FA0DB", "Agustín": "#7FA0DB",
+  "Roberto": "#FF7A3C",
+  "Milagros": "#C13C00",
+  "Cecilia": "#A8C1E8",
+  "Sistema": "#8A8276",
+};
+
+function TypeGlyph({ type, className = "w-4 h-4" }) {
+  const d = TYPE_GLYPHS[type] || TYPE_GLYPHS.general;
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d={d} />
+    </svg>
+  );
+}
+
+// Human-friendly labels for filter chips
+const TYPE_LABELS = {
+  email: "Email",
+  warmup: "Warm-up",
+  csat: "CSAT",
+  deal: "Deal",
+  campaign: "Campaña",
+  report: "Reporte",
+  planning: "Planning",
+  general: "General",
+};
+
+// Small, reusable pill-shaped filter chip.
+function FilterChip({ active, onClick, children, color, title }) {
+  const base = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all border cursor-pointer select-none whitespace-nowrap";
+  const style = active
+    ? { background: `${color || "#FF5005"}22`, color: color || "#FF7A3C", borderColor: `${color || "#FF5005"}55` }
+    : { background: "transparent", color: "#8A8276", borderColor: "#2D2822" };
+  return (
+    <button type="button" onClick={onClick} title={title} className={`${base} hover:border-[#3A342C] hover:text-[#C7BEB1]`} style={style}>
+      {children}
+    </button>
+  );
+}
+
+function LinkedItemChip({ item }) {
+  if (!item) return null;
+  const cfg = TARGET_CHIP[item.kind] || TARGET_CHIP.system;
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium"
+      style={{ color: cfg.color, background: `${cfg.color}12`, border: `1px solid ${cfg.color}25` }}
+    >
+      <span className="text-[9px] opacity-70" aria-hidden="true">{cfg.symbol}</span>
+      {item.label}
+    </span>
+  );
+}
+
+function PriorityBadge({ priority }) {
+  const cfg = {
+    alta:  { bg: "#FF5005", text: "#FFF5EE" },
+    media: { bg: "#FFB088", text: "#1A1713" },
+    baja:  { bg: "#3A342C", text: "#C7BEB1" },
+  }[priority] || { bg: "#2D2822", text: "#C7BEB1" };
+  return (
+    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider tabular" style={{ background: cfg.bg, color: cfg.text }}>
+      {priority}
+    </span>
+  );
+}
+
+function ActionMeta({ a }) {
+  return (
+    <div className="flex items-center gap-3 flex-wrap mt-2 text-[11px] text-[#8A8276]">
+      {a.deadline && (
+        <span className="inline-flex items-center gap-1">
+          <svg viewBox="0 0 14 14" width="11" height="11" className="opacity-70" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.3"/><path d="M7 4v3l2 1.3" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+          <span className={a.deadline === "hoy" ? "text-[#FF7A3C] font-medium" : ""}>{a.deadline}</span>
+        </span>
+      )}
+      {a.eta && (
+        <span className="inline-flex items-center gap-1">
+          <span className="opacity-70">≈</span> {a.eta}
+        </span>
+      )}
+      {a.owner && (
+        <span className="inline-flex items-center gap-1.5">
+          <ActorAvatar name={a.owner} size={16} />
+          <span style={{ color: OWNER_TAG_COLOR[a.owner] || "#C7BEB1" }}>{a.owner}</span>
+        </span>
+      )}
+      {a.origen && (
+        <span className="inline-flex items-center gap-1 text-[#5C5548]">
+          <span className="opacity-60">·</span>
+          <span>{a.origen}</span>
+        </span>
+      )}
+      {a.linkedItem && <LinkedItemChip item={a.linkedItem} />}
+    </div>
+  );
+}
+
 function ActionQueue({ actions, onApprove, onReject, onHold }) {
   const [expanded, setExpanded] = useState(null);
   const [instructions, setInstructions] = useState({});
-  const typeIcons = { email: "\u2709\uFE0F", warmup: "\uD83D\uDD17", csat: "\u2B50", deal: "\uD83D\uDCC1", campaign: "\uD83D\uDE80", report: "\uD83D\uDCCA", planning: "\uD83D\uDCC5", general: "\u26A1" };
-  const priorityColors = { alta: "red", media: "yellow", baja: "gray" };
+  const [batchOpen, setBatchOpen] = useState({});
 
   const handleExpand = (id) => setExpanded(expanded === id ? null : id);
   const handleInstructionChange = (id, val) => setInstructions(prev => ({ ...prev, [id]: val }));
 
+  // Group warmup actions into batch cards (one per verb-root, e.g. "Follow ... en LinkedIn").
+  const warmupActions = actions.filter(a => a.type === "warmup");
+  const otherActions = actions.filter(a => a.type !== "warmup");
+  const warmupGroup = warmupActions.length >= 2 ? warmupActions : [];
+  const warmupInline = warmupActions.length < 2 ? warmupActions : [];
+  const ordered = [...otherActions, ...warmupInline];
+
+  const approveAll = (ids) => ids.forEach(id => onApprove(id, instructions[id]));
+
   return (
     <div className="space-y-3">
-      {actions.map((a) => (
+      {warmupGroup.length > 0 && (() => {
+        const groupId = "warmup-batch";
+        const open = !!batchOpen[groupId];
+        return (
+          <div className="bg-[#1A1713] border border-[#7FA0DB]/30 rounded-xl overflow-hidden">
+            <div className="p-4 flex items-center gap-4 cursor-pointer hover:bg-[#211D18]" onClick={() => setBatchOpen(prev => ({ ...prev, [groupId]: !open }))}>
+              <div className="w-8 h-8 rounded-lg bg-[#7FA0DB]/15 text-[#7FA0DB] flex items-center justify-center flex-shrink-0">
+                <TypeGlyph type="warmup" className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-[#F9F7F1] font-medium">Warm-up LinkedIn · {warmupGroup.length} personas</div>
+                <div className="text-xs text-[#8A8276] mt-0.5">{warmupGroup.map(a => a.linkedItem?.label.split(" · ")[0] || a.action).join(" · ")}</div>
+                <div className="flex items-center gap-3 flex-wrap mt-2 text-[11px] text-[#8A8276]">
+                  <span className="inline-flex items-center gap-1">
+                    <svg viewBox="0 0 14 14" width="11" height="11" className="opacity-70" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.3"/><path d="M7 4v3l2 1.3" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                    <span className="text-[#FF7A3C] font-medium">hoy</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1"><span className="opacity-70">≈</span> {warmupGroup.length * 2} min total</span>
+                  <span className="inline-flex items-center -space-x-1.5">
+                    {[...new Set(warmupGroup.map(a => a.owner))].map(o => <ActorAvatar key={o} name={o} size={18} />)}
+                  </span>
+                  <span className="text-[#5C5548]">Batch · piloto warm-up</span>
+                </div>
+              </div>
+              <PriorityBadge priority="media" />
+              <button
+                onClick={(e) => { e.stopPropagation(); approveAll(warmupGroup.map(a => a.id)); }}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#FF5005]/15 text-[#FF7A3C] border border-[#FF5005]/30 hover:bg-[#FF5005]/25 transition-colors whitespace-nowrap"
+              >
+                Aprobar todas
+              </button>
+              <span className={`text-[#5C5548] text-xs transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
+            </div>
+            {open && (
+              <div className="border-t border-[#2D2822] divide-y divide-[#2D2822]/60">
+                {warmupGroup.map((a) => (
+                  <div key={a.id} className="px-4 py-3 flex items-center gap-3">
+                    <ActorAvatar name={a.owner} size={22} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-[#F9F7F1]">{a.linkedItem?.label || a.action}</div>
+                      <div className="text-[11px] text-[#8A8276] mt-0.5">{a.owner} · {a.eta}</div>
+                    </div>
+                    <button onClick={() => onApprove(a.id, instructions[a.id])} className="px-2.5 py-1 rounded text-[11px] font-medium bg-[#FF5005]/12 text-[#FF7A3C] border border-[#FF5005]/25 hover:bg-[#FF5005]/25">Aprobar</button>
+                    <button onClick={() => onHold && onHold(a.id)} className="px-2.5 py-1 rounded text-[11px] font-medium bg-[#FFB088]/10 text-[#FFB088] border border-[#FFB088]/25 hover:bg-[#FFB088]/20">Hold</button>
+                    <button onClick={() => onReject(a.id)} className="px-2.5 py-1 rounded text-[11px] font-medium bg-[#8A8276]/10 text-[#C7BEB1] border border-[#3A342C] hover:bg-[#8A8276]/20">Rechazar</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {ordered.map((a) => (
         <div key={a.id} className={`bg-[#1A1713] border rounded-xl transition-all ${expanded === a.id ? "border-[#FF5005]/45 shadow-lg shadow-[#FF5005]/5" : "border-[#2D2822] hover:border-[#FF5005]/25"}`}>
           {/* Header row */}
-          <div className="p-4 flex items-center gap-4 cursor-pointer" onClick={() => handleExpand(a.id)}>
-            <span className="text-lg">{typeIcons[a.type] || "\u2022"}</span>
+          <div className="p-4 flex items-start gap-4 cursor-pointer" onClick={() => handleExpand(a.id)}>
+            <div className="w-8 h-8 rounded-lg bg-[#211D18] text-[#C7BEB1] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <TypeGlyph type={a.type} className="w-4 h-4" />
+            </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm text-zinc-200 font-medium">{a.action}</div>
-              <div className="text-xs text-zinc-500 mt-0.5">{a.target}</div>
+              <div className="text-sm text-[#F9F7F1] font-medium leading-snug">{a.action}</div>
+              <div className="text-xs text-[#8A8276] mt-0.5">{a.target}</div>
+              <ActionMeta a={a} />
             </div>
-            <Badge text={a.priority} variant={priorityColors[a.priority]} />
-            <div className="flex gap-2">
-              <button onClick={(e) => { e.stopPropagation(); onApprove(a.id, instructions[a.id]); }} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/15 text-green-400 border border-green-500/30 hover:bg-green-500/25 transition-colors">
-                Aprobar
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); onHold && onHold(a.id, instructions[a.id]); }} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20 transition-colors">
-                Hold
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); onReject(a.id, instructions[a.id]); }} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">
-                Rechazar
-              </button>
+            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+              <PriorityBadge priority={a.priority} />
+              <div className="flex gap-1.5">
+                <button onClick={(e) => { e.stopPropagation(); onApprove(a.id, instructions[a.id]); }} className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#FF5005]/12 text-[#FF7A3C] border border-[#FF5005]/30 hover:bg-[#FF5005]/22 transition-colors">
+                  Aprobar
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); onHold && onHold(a.id, instructions[a.id]); }} className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#FFB088]/10 text-[#FFB088] border border-[#FFB088]/25 hover:bg-[#FFB088]/20 transition-colors">
+                  Hold
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); onReject(a.id, instructions[a.id]); }} className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#8A8276]/10 text-[#C7BEB1] border border-[#3A342C] hover:bg-[#8A8276]/20 transition-colors">
+                  Rechazar
+                </button>
+              </div>
             </div>
-            <span className={`text-zinc-600 text-xs transition-transform ${expanded === a.id ? "rotate-180" : ""}`}>&#9660;</span>
+            <span className={`text-[#5C5548] text-xs transition-transform mt-1 ${expanded === a.id ? "rotate-180" : ""}`}>▾</span>
           </div>
 
           {/* Expanded: preview + instructions panel */}
           {expanded === a.id && (
             <div className="px-4 pb-4 border-t border-[#2D2822] pt-4 space-y-4">
-              {/* Output preview */}
               <ActionPreview type={a.type} metadata={a.metadata} />
 
-              {/* Instructions */}
               <div>
                 <label className="text-xs text-zinc-500 uppercase tracking-wider block mb-1.5">Instrucciones / ajustes antes de ejecutar</label>
                 <textarea
@@ -509,18 +863,18 @@ function ActionQueue({ actions, onApprove, onReject, onHold }) {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <div className="text-xs text-zinc-600">
+                <div className="text-xs text-[#5C5548]">
                   {a.source && <span>Fuente: {a.source}</span>}
                   {a.created_at && <span className="ml-3">Creada: {new Date(a.created_at).toLocaleDateString("es-AR")}</span>}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => onApprove(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-colors">
+                  <button onClick={() => onApprove(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-[#FF5005]/20 text-[#FF7A3C] border border-[#FF5005]/40 hover:bg-[#FF5005]/30 transition-colors">
                     ✓ Aprobar
                   </button>
-                  <button onClick={() => onHold && onHold(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20 transition-colors">
+                  <button onClick={() => onHold && onHold(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-[#FFB088]/10 text-[#FFB088] border border-[#FFB088]/25 hover:bg-[#FFB088]/20 transition-colors">
                     Hold
                   </button>
-                  <button onClick={() => onReject(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">
+                  <button onClick={() => onReject(a.id, instructions[a.id])} className="px-4 py-2 rounded-lg text-sm font-medium bg-[#8A8276]/10 text-[#C7BEB1] border border-[#3A342C] hover:bg-[#8A8276]/20 transition-colors">
                     Rechazar
                   </button>
                 </div>
@@ -561,6 +915,13 @@ export default function Dashboard() {
   const [emailsReport, setEmailsReport] = useState(null); // live email actions from DB
   const [asnCampaigns, setAsnCampaigns] = useState(null);   // live campaigns from Asana via DB
   const [campaignsSyncedAt, setCampaignsSyncedAt] = useState(null);
+
+  // ---- Actions tab: filters + sort (QW4) ----
+  const [actionFilterPriority, setActionFilterPriority] = useState("all"); // all | alta | media | baja
+  const [actionFilterType, setActionFilterType] = useState("all");         // all | warmup | outreach | review | research | followup | other
+  const [actionFilterOwner, setActionFilterOwner] = useState("all");       // all | <owner name> | mine
+  const [actionFilterOrigen, setActionFilterOrigen] = useState("all");     // all | <origen>
+  const [actionSortBy, setActionSortBy] = useState("priority");            // priority | deadline | created
 
   // ---- API Connection: Fetch actions and activity from DB ----
   const fetchActions = useCallback(async () => {
@@ -697,11 +1058,119 @@ export default function Dashboard() {
     ? dbActions.pending.map((a) => ({
         id: a.id, type: a.type, action: a.action, target: a.target,
         priority: a.priority, metadata: a.metadata, source: a.source, created_at: a.created_at,
+        owner: a.metadata?.owner, origen: a.metadata?.origen, deadline: a.metadata?.deadline,
+        eta: a.metadata?.eta, linkedItem: a.metadata?.linkedItem,
       }))
     : actions;
 
+  // ---- QW4: derive filter vocab from current action list ----
+  const actionVocab = useMemo(() => {
+    const owners = new Set();
+    const origenes = new Set();
+    const types = new Set();
+    for (const a of displayActions) {
+      if (a.owner) owners.add(a.owner);
+      if (a.origen) origenes.add(a.origen);
+      if (a.type) types.add(a.type);
+    }
+    return {
+      owners: Array.from(owners).sort(),
+      origenes: Array.from(origenes).sort(),
+      types: Array.from(types).sort(),
+    };
+  }, [displayActions]);
+
+  // ---- QW4: filter + sort pipeline ----
+  const filteredActions = useMemo(() => {
+    const me = "Franco";
+    const priOrder = { alta: 0, media: 1, baja: 2 };
+    const parseDeadline = (d) => {
+      if (!d) return 9e15;
+      const s = String(d).toLowerCase();
+      if (s === "hoy" || s === "today") return Date.now();
+      if (s === "mañana" || s === "manana" || s === "tomorrow") return Date.now() + 864e5;
+      // Try "DD mes" (es) like "22 abr"
+      const esMonths = { ene:0, feb:1, mar:2, abr:3, may:4, jun:5, jul:6, ago:7, sep:8, oct:9, nov:10, dic:11 };
+      const m = s.match(/^(\d{1,2})\s+([a-z]{3})/);
+      if (m) {
+        const day = parseInt(m[1]);
+        const mon = esMonths[m[2]];
+        if (mon !== undefined) {
+          const year = new Date().getFullYear();
+          return new Date(year, mon, day).getTime();
+        }
+      }
+      const t = Date.parse(d);
+      return isNaN(t) ? 9e15 : t;
+    };
+
+    let rows = displayActions.filter((a) => {
+      if (actionFilterPriority !== "all" && a.priority !== actionFilterPriority) return false;
+      if (actionFilterType !== "all" && a.type !== actionFilterType) return false;
+      if (actionFilterOwner === "mine") {
+        if (!a.owner || a.owner.toLowerCase() !== me.toLowerCase()) return false;
+      } else if (actionFilterOwner !== "all" && a.owner !== actionFilterOwner) return false;
+      if (actionFilterOrigen !== "all" && a.origen !== actionFilterOrigen) return false;
+      return true;
+    });
+
+    rows = [...rows].sort((a, b) => {
+      if (actionSortBy === "priority") {
+        const pa = priOrder[a.priority] ?? 3;
+        const pb = priOrder[b.priority] ?? 3;
+        if (pa !== pb) return pa - pb;
+        return parseDeadline(a.deadline) - parseDeadline(b.deadline);
+      }
+      if (actionSortBy === "deadline") {
+        return parseDeadline(a.deadline) - parseDeadline(b.deadline);
+      }
+      if (actionSortBy === "created") {
+        const ta = a.created_at ? Date.parse(a.created_at) : 0;
+        const tb = b.created_at ? Date.parse(b.created_at) : 0;
+        return tb - ta;
+      }
+      return 0;
+    });
+
+    return rows;
+  }, [displayActions, actionFilterPriority, actionFilterType, actionFilterOwner, actionFilterOrigen, actionSortBy]);
+
+  const actionFiltersActive = actionFilterPriority !== "all"
+    || actionFilterType !== "all"
+    || actionFilterOwner !== "all"
+    || actionFilterOrigen !== "all";
+
+  const clearActionFilters = () => {
+    setActionFilterPriority("all");
+    setActionFilterType("all");
+    setActionFilterOwner("all");
+    setActionFilterOrigen("all");
+  };
+
+  // Live activity: detail column may contain either plain text (legacy) or a JSON blob
+  // with rich shape {actor, verb, target, targetType, targetId, reason}.
   const displayActivity = activityFeedLive
-    ? activityFeedLive.map(a => ({ time: new Date(a.time).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }), action: a.action, type: a.type, detail: a.detail }))
+    ? activityFeedLive.map(a => {
+        const time = formatRelativeTime(a.time);
+        let rich = null;
+        if (a.detail && typeof a.detail === "string" && a.detail.trim().startsWith("{")) {
+          try { rich = JSON.parse(a.detail); } catch { rich = null; }
+        } else if (a.detail && typeof a.detail === "object") {
+          rich = a.detail;
+        }
+        if (rich && (rich.actor || rich.verb)) {
+          return {
+            time, type: a.type,
+            actor: rich.actor || "Sistema",
+            verb: rich.verb || a.action,
+            target: rich.target || "",
+            targetType: rich.targetType || "system",
+            targetId: rich.targetId,
+            reason: rich.reason,
+          };
+        }
+        return { time, action: a.action, type: a.type, detail: typeof a.detail === "string" ? a.detail : "" };
+      })
     : ACTIVITY_FEED;
 
   // Computed stats
@@ -721,18 +1190,19 @@ export default function Dashboard() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#0F0D0A]/80 backdrop-blur-xl border-b border-[#2D2822]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#FF5005] flex items-center justify-center text-black font-black text-sm shadow-lg shadow-[#FF5005]/20">A</div>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight text-[#F9F7F1]">SDR Command Center</h1>
-              <p className="text-xs text-[#8A8276]">Aerolab &middot; Franco Rodriguez</p>
+          <div className="flex items-center gap-4">
+            <AerolabWordmark className="h-[22px] w-auto text-[#F9F7F1]" />
+            <div className="h-7 w-px bg-[#2D2822]" aria-hidden="true" />
+            <div className="leading-tight">
+              <h1 className="text-[15px] font-semibold tracking-tight text-[#F9F7F1]">SDR Command Center</h1>
+              <p className="text-[11px] text-[#8A8276] tabular">Franco Rodriguez &middot; Aerolab</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-xs text-zinc-500">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#FF5005] animate-pulse" />
               Sync: {lastSyncTime}
-              {apiStatus === "connected" && <span className="ml-2 text-green-400">&middot; DB live</span>}
+              {apiStatus === "connected" && <span className="ml-2 text-[#7FA0DB]">&middot; DB live</span>}
             </div>
             <div className="text-xs text-zinc-600">446 deals SDR &middot; 15 campanas</div>
             <a href="/graph"
@@ -772,8 +1242,8 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard label="Deals Totales SDR" value="446" sub={`${stats.active} activos · ${stats.won} ganados`} color="#FF5005" />
               <StatCard label="Campanas Activas" value="15" sub="Lost SQL + Nurture Stalled = prioridad" color="#203B83" />
-              <StatCard label="CSAT Completado" value={`${Math.round((stats.csatDone / stats.csatTotal) * 100)}%`} sub={`${stats.csatDone} de ${stats.csatTotal} respondidos`} color="#eab308" />
-              <StatCard label="NPS Completado" value={`${Math.round((stats.npsDone / stats.npsTotal) * 100)}%`} sub={`${stats.npsDone} de ${stats.npsTotal} respondidos`} color="#22c55e" />
+              <StatCard label="CSAT Completado" value={`${Math.round((stats.csatDone / stats.csatTotal) * 100)}%`} sub={`${stats.csatDone} de ${stats.csatTotal} respondidos`} color="#FFB088" />
+              <StatCard label="NPS Completado" value={`${Math.round((stats.npsDone / stats.npsTotal) * 100)}%`} sub={`${stats.npsDone} de ${stats.npsTotal} respondidos`} color="#7FA0DB" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -845,12 +1315,12 @@ export default function Dashboard() {
           const campaigns = asnCampaigns || [];
 
           const STATUS_CONFIG = {
-            "In Progress": { color: "#22c55e", bg: "bg-green-500/15", text: "text-green-400", border: "border-green-500/20", dot: "#22c55e" },
-            "Planning":    { color: "#FF5005", bg: "bg-[#FF5005]/15",  text: "text-[#FF7A3C]",  border: "border-[#FF5005]/25",  dot: "#FF5005" },
-            "On Hold":     { color: "#f97316", bg: "bg-orange-500/15",text: "text-orange-400",border: "border-orange-500/20",dot: "#f97316" },
-            "Not Started": { color: "#71717a", bg: "bg-zinc-500/10",  text: "text-zinc-500",  border: "border-zinc-700",     dot: "#71717a" },
-            "Completed":   { color: "#eab308", bg: "bg-yellow-500/15",text: "text-yellow-400",border: "border-yellow-500/20",dot: "#eab308" },
-            "Killed":      { color: "#ef4444", bg: "bg-red-500/10",   text: "text-red-400",   border: "border-red-500/20",   dot: "#ef4444" },
+            "In Progress": { color: "#FF5005", bg: "bg-[#FF5005]/15",   text: "text-[#FF7A3C]",  border: "border-[#FF5005]/30", dot: "#FF5005" },
+            "Planning":    { color: "#FF7A3C", bg: "bg-[#FF7A3C]/15",   text: "text-[#FFB088]",  border: "border-[#FF7A3C]/25", dot: "#FF7A3C" },
+            "On Hold":     { color: "#FFB088", bg: "bg-[#FFB088]/15",   text: "text-[#FFB088]",  border: "border-[#FFB088]/25", dot: "#FFB088" },
+            "Not Started": { color: "#8A8276", bg: "bg-[#8A8276]/10",   text: "text-[#8A8276]",  border: "border-[#3A342C]",    dot: "#8A8276" },
+            "Completed":   { color: "#7FA0DB", bg: "bg-[#7FA0DB]/15",   text: "text-[#A8C1E8]",  border: "border-[#7FA0DB]/25", dot: "#7FA0DB" },
+            "Killed":      { color: "#5C5548", bg: "bg-[#5C5548]/15",   text: "text-[#5C5548]",  border: "border-[#3A342C]",    dot: "#5C5548" },
           };
 
           // Filter by status period
@@ -976,16 +1446,16 @@ export default function Dashboard() {
             <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-zinc-300 mb-3">Insight de Response Rate</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-3 bg-green-500/5 border border-green-500/10 rounded-lg">
-                  <div className="text-lg font-bold text-green-400">51%</div>
+                <div className="p-3 bg-[#7FA0DB]/5 border border-[#7FA0DB]/15 rounded-lg">
+                  <div className="text-lg font-bold text-[#7FA0DB]">51%</div>
                   <div className="text-xs text-zinc-500">Sweet spot: 31-75 palabras</div>
                 </div>
-                <div className="p-3 bg-yellow-500/5 border border-yellow-500/10 rounded-lg">
-                  <div className="text-lg font-bold text-yellow-400">30%+</div>
+                <div className="p-3 bg-[#FFB088]/5 border border-[#FFB088]/15 rounded-lg">
+                  <div className="text-lg font-bold text-[#FFB088]">30%+</div>
                   <div className="text-xs text-zinc-500">Rate promedio sector SDR</div>
                 </div>
-                <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-lg">
-                  <div className="text-lg font-bold text-red-400">-83%</div>
+                <div className="p-3 bg-[#8A8276]/5 border border-[#8A8276]/15 rounded-lg">
+                  <div className="text-lg font-bold text-[#C7BEB1]">-83%</div>
                   <div className="text-xs text-zinc-500">Drop en emails &gt;150 palabras</div>
                 </div>
               </div>
@@ -1032,16 +1502,16 @@ export default function Dashboard() {
                 <div className="text-3xl font-bold text-[#FF7A3C]">{visibleTotal}</div>
                 <div className="text-xs text-zinc-500 mt-1">Deals en vista</div>
               </div>
-              <div className="bg-[#1A1713] border border-green-500/20 rounded-xl p-4 text-center">
-                <div className="text-3xl font-bold text-green-400">{visibleStages.filter(s=>s.group==="active").reduce((s,st)=>s+st.count,0)}</div>
+              <div className="bg-[#1A1713] border border-[#7FA0DB]/22 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-[#7FA0DB]">{visibleStages.filter(s=>s.group==="active").reduce((s,st)=>s+st.count,0)}</div>
                 <div className="text-xs text-zinc-500 mt-1">En outreach activo</div>
               </div>
-              <div className="bg-[#1A1713] border border-yellow-500/20 rounded-xl p-4 text-center">
-                <div className="text-3xl font-bold text-yellow-400">{visibleStages.filter(s=>s.group==="won").reduce((s,st)=>s+st.count,0)}</div>
+              <div className="bg-[#1A1713] border border-[#FFB088]/22 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-[#FFB088]">{visibleStages.filter(s=>s.group==="won").reduce((s,st)=>s+st.count,0)}</div>
                 <div className="text-xs text-zinc-500 mt-1">Won</div>
               </div>
-              <div className="bg-[#1A1713] border border-red-500/20 rounded-xl p-4 text-center">
-                <div className="text-3xl font-bold text-red-400">{visibleStages.filter(s=>s.group==="lost").reduce((s,st)=>s+st.count,0)}</div>
+              <div className="bg-[#1A1713] border border-[#8A8276]/25 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-[#C7BEB1]">{visibleStages.filter(s=>s.group==="lost").reduce((s,st)=>s+st.count,0)}</div>
                 <div className="text-xs text-zinc-500 mt-1">Lost</div>
               </div>
             </div>
@@ -1085,10 +1555,10 @@ export default function Dashboard() {
                 {[
                   { stage: "Identificar", count: 3, color: "text-[#7FA0DB]" },
                   { stage: "Follow", count: 0, color: "text-[#FF7A3C]" },
-                  { stage: "Engage", count: 0, color: "text-cyan-400" },
-                  { stage: "Connect", count: 0, color: "text-green-400" },
-                  { stage: "Ready", count: 0, color: "text-yellow-400" },
-                  { stage: "Outreach", count: 0, color: "text-orange-400" },
+                  { stage: "Engage", count: 0, color: "text-[#A8C1E8]" },
+                  { stage: "Connect", count: 0, color: "text-[#7FA0DB]" },
+                  { stage: "Ready", count: 0, color: "text-[#FFB088]" },
+                  { stage: "Outreach", count: 0, color: "text-[#FF5005]" },
                 ].map(({stage, count, color}) => (
                   <div key={stage} className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-3 text-center">
                     <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{stage}</div>
@@ -1151,11 +1621,11 @@ export default function Dashboard() {
               <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                 <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">CSAT</div>
                 <div className="flex items-end gap-2">
-                  <span className="text-3xl font-bold text-yellow-400">{stats.csatDone}</span>
+                  <span className="text-3xl font-bold text-[#FFB088]">{stats.csatDone}</span>
                   <span className="text-sm text-zinc-500 mb-1">/ {stats.csatTotal} respondidos</span>
                 </div>
                 <div className="mt-3 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${(stats.csatDone / stats.csatTotal) * 100}%` }} />
+                  <div className="h-full bg-[#FFB088] rounded-full" style={{ width: `${(stats.csatDone / stats.csatTotal) * 100}%` }} />
                 </div>
                 <div className="text-xs text-zinc-500 mt-2">{Math.round((stats.csatDone / stats.csatTotal) * 100)}% completado</div>
                 <div className="mt-3 text-xs text-zinc-400">
@@ -1187,8 +1657,8 @@ export default function Dashboard() {
                   <div className="text-sm font-medium text-[#FF7A3C] mb-1">Canal primario: Email</div>
                   <div className="text-xs text-zinc-500">Primer y segundo intento via email. Sweet spot 31-75 palabras.</div>
                 </div>
-                <div className="p-3 bg-green-500/5 border border-green-500/10 rounded-lg">
-                  <div className="text-sm font-medium text-green-400 mb-1">Canal alternativo: WhatsApp</div>
+                <div className="p-3 bg-[#7FA0DB]/5 border border-[#7FA0DB]/15 rounded-lg">
+                  <div className="text-sm font-medium text-[#7FA0DB] mb-1">Canal alternativo: WhatsApp</div>
                   <div className="text-xs text-zinc-500">Para no respondedores despues de 2 intentos por email.</div>
                 </div>
               </div>
@@ -1233,7 +1703,7 @@ export default function Dashboard() {
                       <div className="text-xs text-zinc-500">Deals totales</div>
                     </div>
                     <div className="bg-[#14110D] rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-green-400">{SANTILLANA.deals.totalRevenue}</div>
+                      <div className="text-2xl font-bold text-[#7FA0DB]">{SANTILLANA.deals.totalRevenue}</div>
                       <div className="text-xs text-zinc-500">Revenue total</div>
                     </div>
                     <div className="bg-[#14110D] rounded-lg p-3 text-center">
@@ -1244,28 +1714,28 @@ export default function Dashboard() {
                 </div>
 
                 {/* Granola Context — What's happening NOW */}
-                <div className="bg-gradient-to-r from-yellow-500/5 to-orange-500/5 border border-yellow-500/20 rounded-xl p-5">
-                  <h3 className="text-sm font-semibold text-yellow-300 mb-3">Contexto Actual (Granola)</h3>
+                <div className="bg-gradient-to-r from-[#FFB088]/5 to-[#FF5005]/5 border border-[#FFB088]/25 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-[#FFB088] mb-3">Contexto Actual (Granola)</h3>
                   <div className="space-y-3 text-sm">
                     <div>
-                      <span className="text-xs text-yellow-400/80 uppercase tracking-wider">Proyecto actual</span>
+                      <span className="text-xs text-[#FFB088]/80 uppercase tracking-wider">Proyecto actual</span>
                       <p className="text-zinc-300 mt-1">{SANTILLANA.granolaNotes.currentProject}</p>
                     </div>
                     <div>
-                      <span className="text-xs text-yellow-400/80 uppercase tracking-wider">Nueva oportunidad</span>
+                      <span className="text-xs text-[#FFB088]/80 uppercase tracking-wider">Nueva oportunidad</span>
                       <p className="text-zinc-300 mt-1">{SANTILLANA.granolaNotes.newOpportunity}</p>
                     </div>
                     <div>
-                      <span className="text-xs text-yellow-400/80 uppercase tracking-wider">Insight de relaciones</span>
+                      <span className="text-xs text-[#FFB088]/80 uppercase tracking-wider">Insight de relaciones</span>
                       <p className="text-zinc-300 mt-1">{SANTILLANA.granolaNotes.relationshipInsight}</p>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-yellow-500/10">
-                    <span className="text-xs text-yellow-400/80 uppercase tracking-wider">Next Steps (para jueves)</span>
+                  <div className="mt-4 pt-3 border-t border-[#FFB088]/15">
+                    <span className="text-xs text-[#FFB088]/80 uppercase tracking-wider">Next Steps (para jueves)</span>
                     <div className="mt-2 space-y-1">
                       {SANTILLANA.granolaNotes.nextSteps.map((s, i) => (
                         <div key={i} className="flex items-start gap-2 text-sm text-zinc-300">
-                          <span className="text-yellow-400 mt-0.5 text-xs">→</span> {s}
+                          <span className="text-[#FFB088] mt-0.5 text-xs">→</span> {s}
                         </div>
                       ))}
                     </div>
@@ -1289,7 +1759,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div className="text-right ml-3">
-                            <div className="text-sm font-medium text-green-400">{d.amount}</div>
+                            <div className="text-sm font-medium text-[#7FA0DB]">{d.amount}</div>
                             <div className="text-xs text-zinc-600">{d.modified}</div>
                           </div>
                         </div>
@@ -1307,16 +1777,16 @@ export default function Dashboard() {
                             <div className="text-sm text-zinc-200 truncate">{d.name}</div>
                             <div className="text-xs text-zinc-500">{d.closedAt}</div>
                           </div>
-                          <span className="text-sm font-medium text-green-400 ml-3">{d.amount}</span>
+                          <span className="text-sm font-medium text-[#7FA0DB] ml-3">{d.amount}</span>
                         </div>
                       ))}
                     </div>
                     <div className="mt-3 pt-3 border-t border-[#2D2822]">
-                      <h4 className="text-xs text-red-400/80 mb-2">Deals Perdidos</h4>
+                      <h4 className="text-xs text-[#C7BEB1]/80 mb-2">Deals Perdidos</h4>
                       {SANTILLANA.deals.lost.map((d, i) => (
                         <div key={i} className="flex items-center justify-between py-1.5">
                           <span className="text-sm text-zinc-400 truncate">{d.name}</span>
-                          <span className="text-sm text-red-400/70 ml-3">{d.amount}</span>
+                          <span className="text-sm text-[#C7BEB1]/70 ml-3">{d.amount}</span>
                         </div>
                       ))}
                     </div>
@@ -1328,7 +1798,7 @@ export default function Dashboard() {
                   <h3 className="text-sm font-semibold text-zinc-300 mb-4">Contactos Clave ({SANTILLANA.keyContacts.length} mapeados)</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {SANTILLANA.keyContacts.map((c, i) => (
-                      <div key={i} className={`rounded-lg p-3 border ${c.tier === "hot" ? "bg-red-500/5 border-red-500/20" : c.tier === "warm" ? "bg-orange-500/5 border-orange-500/15" : "bg-zinc-800/30 border-[#2D2822]"}`}>
+                      <div key={i} className={`rounded-lg p-3 border ${c.tier === "hot" ? "bg-[#FF5005]/5 border-[#FF5005]/25" : c.tier === "warm" ? "bg-[#FFB088]/5 border-[#FFB088]/20" : "bg-[#1A1713]/60 border-[#2D2822]"}`}>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm font-medium text-zinc-200">{c.name}</span>
                           <Badge text={c.tier} variant={c.tier === "hot" ? "hot" : c.tier === "warm" ? "warm" : "gray"} />
@@ -1442,7 +1912,7 @@ export default function Dashboard() {
                       <div key={d.name} className="flex items-center justify-between py-2 border-b border-[#2D2822]/50">
                         <span className="text-sm text-zinc-300">{d.name}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-green-400">{d.amount}</span>
+                          <span className="text-sm font-medium text-[#7FA0DB]">{d.amount}</span>
                           <Badge text={d.stage} variant="green" />
                         </div>
                       </div>
@@ -1482,16 +1952,105 @@ export default function Dashboard() {
 
         {/* ---- ACTIONS ---- */}
         {activeTab === "actions" && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Cola de Acciones</h2>
+              <div>
+                <h2 className="text-lg font-semibold">Cola de Acciones</h2>
+                <p className="text-xs text-[#8A8276] mt-0.5 tabular">
+                  {filteredActions.length === displayActions.length
+                    ? `${displayActions.length} pendientes`
+                    : `${filteredActions.length} de ${displayActions.length} pendientes`}
+                </p>
+              </div>
               <div className="flex gap-2">
                 <Badge text={apiStatus === "connected" ? "DB conectada" : "Modo local"} variant={apiStatus === "connected" ? "green" : "gray"} />
-                <Badge text={`${displayActions.length} pendientes`} variant={displayActions.length > 0 ? "blue" : "green"} />
+                <Badge text={`${displayActions.length} totales`} variant={displayActions.length > 0 ? "blue" : "green"} />
               </div>
             </div>
-            {displayActions.length > 0 ? (
-              <ActionQueue actions={displayActions} onApprove={handleApprove} onReject={handleReject} onHold={handleHold} />
+
+            {/* Filter bar (QW4) */}
+            {displayActions.length > 0 && (
+              <div className="bg-[#14110D] border border-[#2D2822] rounded-xl p-3 space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] uppercase tracking-wider text-[#5C5548] font-semibold mr-1">Prioridad</span>
+                  <FilterChip active={actionFilterPriority === "all"} onClick={() => setActionFilterPriority("all")} color="#C7BEB1">Todas</FilterChip>
+                  <FilterChip active={actionFilterPriority === "alta"} onClick={() => setActionFilterPriority("alta")} color="#FF5005">Alta</FilterChip>
+                  <FilterChip active={actionFilterPriority === "media"} onClick={() => setActionFilterPriority("media")} color="#FFB088">Media</FilterChip>
+                  <FilterChip active={actionFilterPriority === "baja"} onClick={() => setActionFilterPriority("baja")} color="#8A8276">Baja</FilterChip>
+
+                  <span className="w-px h-5 bg-[#2D2822] mx-1" aria-hidden="true" />
+
+                  <span className="text-[10px] uppercase tracking-wider text-[#5C5548] font-semibold mr-1">Scope</span>
+                  <FilterChip active={actionFilterOwner === "all"} onClick={() => setActionFilterOwner("all")} color="#C7BEB1">Todo el equipo</FilterChip>
+                  <FilterChip active={actionFilterOwner === "mine"} onClick={() => setActionFilterOwner("mine")} color="#FF5005">
+                    <ActorAvatar name="Franco" size={12} /> Mías
+                  </FilterChip>
+
+                  <span className="w-px h-5 bg-[#2D2822] mx-1" aria-hidden="true" />
+
+                  <span className="text-[10px] uppercase tracking-wider text-[#5C5548] font-semibold mr-1">Ordenar</span>
+                  <FilterChip active={actionSortBy === "priority"} onClick={() => setActionSortBy("priority")} color="#FF7A3C">Prioridad</FilterChip>
+                  <FilterChip active={actionSortBy === "deadline"} onClick={() => setActionSortBy("deadline")} color="#FF7A3C">Deadline</FilterChip>
+                  <FilterChip active={actionSortBy === "created"} onClick={() => setActionSortBy("created")} color="#FF7A3C">Más reciente</FilterChip>
+
+                  {actionFiltersActive && (
+                    <>
+                      <span className="flex-1" />
+                      <button onClick={clearActionFilters} className="text-[11px] text-[#FF7A3C] hover:text-[#FF5005] underline underline-offset-2 ml-auto">
+                        Limpiar filtros
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {(actionVocab.types.length > 1 || actionVocab.owners.length > 1 || actionVocab.origenes.length > 1) && (
+                  <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-[#2D2822]">
+                    {actionVocab.types.length > 1 && (
+                      <>
+                        <span className="text-[10px] uppercase tracking-wider text-[#5C5548] font-semibold mr-1">Tipo</span>
+                        <FilterChip active={actionFilterType === "all"} onClick={() => setActionFilterType("all")} color="#C7BEB1">Todos</FilterChip>
+                        {actionVocab.types.map((t) => (
+                          <FilterChip key={t} active={actionFilterType === t} onClick={() => setActionFilterType(t)} color="#7FA0DB">
+                            <TypeGlyph type={t} className="w-3 h-3" /> {TYPE_LABELS[t] || t}
+                          </FilterChip>
+                        ))}
+                        <span className="w-px h-5 bg-[#2D2822] mx-1" aria-hidden="true" />
+                      </>
+                    )}
+                    {actionVocab.owners.length > 1 && actionFilterOwner !== "mine" && (
+                      <>
+                        <span className="text-[10px] uppercase tracking-wider text-[#5C5548] font-semibold mr-1">Owner</span>
+                        {actionVocab.owners.map((o) => (
+                          <FilterChip key={o} active={actionFilterOwner === o} onClick={() => setActionFilterOwner(actionFilterOwner === o ? "all" : o)} color={OWNER_TAG_COLOR[o] || "#C7BEB1"}>
+                            <ActorAvatar name={o} size={12} /> {o}
+                          </FilterChip>
+                        ))}
+                        <span className="w-px h-5 bg-[#2D2822] mx-1" aria-hidden="true" />
+                      </>
+                    )}
+                    {actionVocab.origenes.length > 1 && (
+                      <>
+                        <span className="text-[10px] uppercase tracking-wider text-[#5C5548] font-semibold mr-1">Origen</span>
+                        <FilterChip active={actionFilterOrigen === "all"} onClick={() => setActionFilterOrigen("all")} color="#C7BEB1">Todos</FilterChip>
+                        {actionVocab.origenes.map((o) => (
+                          <FilterChip key={o} active={actionFilterOrigen === o} onClick={() => setActionFilterOrigen(actionFilterOrigen === o ? "all" : o)} color="#A8C1E8">{o}</FilterChip>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {filteredActions.length > 0 ? (
+              <ActionQueue actions={filteredActions} onApprove={handleApprove} onReject={handleReject} onHold={handleHold} />
+            ) : displayActions.length > 0 ? (
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-10 text-center">
+                <div className="text-sm text-[#C7BEB1] font-medium">Ninguna acción matchea los filtros</div>
+                <button onClick={clearActionFilters} className="mt-3 inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-[#FF5005]/15 text-[#FF7A3C] border border-[#FF5005]/30 hover:bg-[#FF5005]/25">
+                  Limpiar filtros
+                </button>
+              </div>
             ) : (
               <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-12 text-center">
                 <div className="text-2xl mb-2">&#10003;</div>
@@ -1502,11 +2061,11 @@ export default function Dashboard() {
 
             {/* Approved actions — waiting execution */}
             {dbActions?.approved?.length > 0 && (
-              <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-green-300 mb-3">Aprobadas — Esperando ejecucion ({dbActions.approved.length})</h3>
+              <div className="bg-[#FF5005]/5 border border-[#FF5005]/25 rounded-xl p-5">
+                <h3 className="text-sm font-semibold text-[#FF7A3C] mb-3">Aprobadas — Esperando ejecucion ({dbActions.approved.length})</h3>
                 <div className="space-y-2">
                   {dbActions.approved.map((a) => (
-                    <div key={a.id} className="flex items-start justify-between py-2 border-b border-green-500/10 last:border-0">
+                    <div key={a.id} className="flex items-start justify-between py-2 border-b border-[#FF5005]/12 last:border-0">
                       <div className="flex-1">
                         <div className="text-sm text-zinc-200">{a.action}</div>
                         <div className="text-xs text-zinc-500">{a.target}</div>
@@ -1518,7 +2077,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center gap-2 ml-3">
                         <Badge text="aprobada" variant="green" />
-                        <button onClick={() => handleHold(a.id, "Movida desde aprobadas")} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20 transition-colors">
+                        <button onClick={() => handleHold(a.id, "Movida desde aprobadas")} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#FFB088]/10 text-[#FFB088] border border-[#FFB088]/25 hover:bg-[#FFB088]/20 transition-colors">
                           Hold
                         </button>
                       </div>
@@ -1531,16 +2090,16 @@ export default function Dashboard() {
 
             {/* Hold actions — parked for later */}
             {dbActions?.hold?.length > 0 && (
-              <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-orange-300 mb-3">En Hold ({dbActions.hold.length})</h3>
+              <div className="bg-[#FFB088]/5 border border-[#FFB088]/25 rounded-xl p-5">
+                <h3 className="text-sm font-semibold text-[#FFB088] mb-3">En Hold ({dbActions.hold.length})</h3>
                 <div className="space-y-2">
                   {dbActions.hold.map((a) => (
-                    <div key={a.id} className="flex items-start justify-between py-2 border-b border-orange-500/10 last:border-0">
+                    <div key={a.id} className="flex items-start justify-between py-2 border-b border-[#FFB088]/12 last:border-0">
                       <div className="flex-1">
                         <div className="text-sm text-zinc-200">{a.action}</div>
                         <div className="text-xs text-zinc-500">{a.target}</div>
                         {a.instructions && (
-                          <div className="mt-1.5 px-2 py-1 bg-[#14110D] rounded text-xs text-orange-300 border-l-2 border-orange-500/40">
+                          <div className="mt-1.5 px-2 py-1 bg-[#14110D] rounded text-xs text-[#FFB088] border-l-2 border-[#FFB088]/50">
                             {a.instructions}
                           </div>
                         )}
@@ -1569,7 +2128,7 @@ export default function Dashboard() {
                         <div className="text-sm text-zinc-400 line-through">{a.action}</div>
                         <div className="text-xs text-zinc-600">{a.target}</div>
                         {a.instructions && <div className="mt-1 text-xs text-zinc-600 italic">Instrucciones: {a.instructions}</div>}
-                        {a.execution_log && <div className="mt-1 text-xs text-green-400/60">Resultado: {typeof a.execution_log === 'string' ? a.execution_log : JSON.stringify(a.execution_log)}</div>}
+                        {a.execution_log && <div className="mt-1 text-xs text-[#7FA0DB]/60">Resultado: {typeof a.execution_log === 'string' ? a.execution_log : JSON.stringify(a.execution_log)}</div>}
                       </div>
                       <Badge text="completada" variant="green" />
                     </div>
