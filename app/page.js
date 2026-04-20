@@ -4,17 +4,18 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 
 // ============================================================
 // REAL DATA — Extracted from HubSpot, Asana, Granola, Ecosystem Graph
-// Last sync: 2026-04-07 ~17:00 UTC
+// Last sync: 2026-04-20 ~15:35 UTC
 // ============================================================
 
-const LAST_SYNC = "7 abr 2026, 17:00";
+const LAST_SYNC = "20 abr 2026, 15:35";
 
 const STAGE_MAP = {
   "1224356372": { name: "New Lead", group: "pre", color: "#71717a", order: 0 },
   "1224356373": { name: "Research + Tagging", group: "pre", color: "#8b5cf6", order: 1 },
   "1232050606": { name: "Ready to Ship", group: "pre", color: "#6366f1", order: 2 },
-  "1308810585": { name: "Ready to Ship by Owner", group: "pre", color: "#3b82f6", order: 3 },
+  "1308810585": { name: "Ready to Ship by Owner", group: "pre", color: "#FF5005", order: 3 },
   "1244737059": { name: "Hold", group: "pre", color: "#f97316", order: 4 },
+  "1282557052": { name: "On Review", group: "pre", color: "#eab308", order: 4.5 },
   "1224356374": { name: "Initial Outreach", group: "active", color: "#22c55e", order: 5 },
   "1275457612": { name: "1st Email Answered", group: "active", color: "#10b981", order: 6 },
   "1224356375": { name: "Followup Sequence", group: "active", color: "#14b8a6", order: 7 },
@@ -27,35 +28,33 @@ const STAGE_MAP = {
   "1244570040": { name: "Lost (Disqualified)", group: "lost", color: "#991b1b", order: 14 },
 };
 
-// Real data from HubSpot SDR pipeline (826132498) — 443 deals total
+// Real data from HubSpot SDR pipeline (826132498) — 446 deals total (refresh 20-Apr-2026)
 const CAMPAIGNS_DATA = [
-  { name: "Lost SQL", total: 133, stages: { "1224356374": 1, "1224356377": 1, "1224356378": 7, "1225118004": 14, "1244570040": 110 }, description: "Deals que recibieron propuesta y se perdieron. Timing minimo 2 meses post-perdida." },
-  { name: "AI/Branding Outreach", total: 79, stages: { "1224356372": 10, "1224356373": 4, "1224356378": 3, "1225118004": 5, "1244570040": 57 }, description: "Case studies de AI compartidos. Campana hiperpersonalizada completada." },
+  { name: "Lost SQL", total: 141, stages: { "1224356374": 1, "1224356377": 1, "1224356378": 5, "1225118004": 15, "1244570040": 117, "1282557052": 2 }, description: "Deals que recibieron propuesta y se perdieron. Timing minimo 2 meses post-perdida." },
+  { name: "AI/Branding Outreach", total: 79, stages: { "1224356377": 2, "1224356378": 17, "1225118004": 47, "1244570040": 13 }, description: "Case studies de AI compartidos. Campana hiperpersonalizada completada." },
   { name: "Referrers", total: 40, stages: { "1224356377": 1, "1224356378": 4, "1225118004": 19, "1244570040": 16 }, description: "Partners de referidos. Emails enviados a todos los contactos." },
-  { name: "Job Change", total: 34, stages: { "1224356378": 6, "1225118004": 5, "1244570040": 23 }, description: "Contactos que cambiaron de trabajo. Outreach por nuevo contexto." },
-  { name: "EOY Message", total: 33, stages: { "1225118004": 28, "1244570040": 5 }, description: "Mensaje de fin de ano 2025. 25 emails enviados." },
-  { name: "Referral Renew", total: 30, stages: { "1224356378": 4, "1244570040": 26 }, description: "Renovacion de referidos existentes." },
-  { name: "Happy Current Customer", total: 19, stages: { "1244737059": 6, "1224356373": 1, "1244570040": 12 }, description: "Champions de proyectos cerrados 2025. Sentiment: Promoter. 18 contactos target." },
-  { name: "NPS", total: 18, stages: { "1224356373": 1, "1224356374": 1, "1224356375": 7, "1224356378": 2, "1244570040": 4, "1244737059": 3 }, description: "Seguimiento Net Promoter Score. Meta: completar en 2 meses." },
-  { name: "2025 Gift", total: 18, stages: { "1224356377": 18 }, description: "Regalos enviados a clientes 2025. 100% completado." },
-  { name: "Showcase", total: 15, stages: { "1224356378": 4, "1225118004": 6, "1244570040": 5 }, description: "Showcase de proyectos a prospects." },
-  { name: "CSAT", total: 11, stages: { "1224356373": 1, "1224356375": 3, "1224356377": 2, "1244570040": 3, "1244737059": 2 }, description: "Customer Satisfaction Score. Seguimiento agresivo multi-canal." },
-  { name: "Sin Tipo", total: 8, stages: { "1224356372": 6, "1244570040": 2 }, description: "Deals sin outreach_type asignado." },
+  { name: "Job change", total: 34, stages: { "1224356378": 11, "1225118004": 14, "1244570040": 9 }, description: "Contactos que cambiaron de trabajo. Outreach por nuevo contexto." },
+  { name: "Referral renew", total: 30, stages: { "1224356378": 4, "1244570040": 26 }, description: "Renovacion de referidos existentes." },
+  { name: "EOY message", total: 26, stages: { "1225118004": 18, "1244570040": 8 }, description: "Mensaje de fin de ano 2025. Cohort cerrado." },
+  { name: "Happy Current Customer", total: 19, stages: { "1224356378": 1, "1225118004": 1, "1244570040": 17 }, description: "Champions de proyectos cerrados 2025. Sentiment: Promoter." },
+  { name: "NPS", total: 18, stages: { "1224356374": 1, "1224356375": 1, "1224356378": 2, "1244570040": 7, "1282557052": 7 }, description: "Seguimiento Net Promoter Score. Meta: completar en 2 meses." },
+  { name: "2025 Gift", total: 18, stages: { "1224356377": 14, "1225118004": 1, "1244570040": 3 }, description: "Regalos enviados a clientes 2025. 100% completado." },
+  { name: "Showcase", total: 15, stages: { "1225118004": 14, "1244570040": 1 }, description: "Showcase de proyectos a prospects." },
+  { name: "CSAT", total: 11, stages: { "1224356375": 3, "1224356377": 2, "1244570040": 6 }, description: "Customer Satisfaction Score. Seguimiento agresivo multi-canal." },
+  { name: "Sin Tipo", total: 8, stages: { "1224356378": 1, "1225118004": 6, "1244570040": 1 }, description: "Deals sin outreach_type asignado." },
+  { name: "Other/Regular", total: 3, stages: { "1224356377": 2, "1244570040": 1 }, description: "Outreach regular." },
   { name: "VIP Referrers", total: 3, stages: { "1225118004": 2, "1244570040": 1 }, description: "Referrers VIP de alto valor." },
-  { name: "Other/Regular", total: 3, stages: { "1225118004": 2, "1244570040": 1 }, description: "Outreach regular." },
-  { name: "Branding Free Trial", total: 1, stages: { "1224356377": 1 }, description: "Prueba de branding gratuita." },
+  { name: "Branding free trial", total: 1, stages: { "1224356377": 1 }, description: "Prueba de branding gratuita." },
 ];
 
 const PIPELINE_STAGES_REAL = [
-  { id: "1224356372", name: "New Lead", count: 16, color: "#71717a", group: "pre" },
-  { id: "1224356373", name: "Research + Tag", count: 6, color: "#8b5cf6", group: "pre" },
-  { id: "1244737059", name: "Hold", count: 11, color: "#f97316", group: "pre" },
+  { id: "1282557052", name: "On Review", count: 9, color: "#eab308", group: "pre" },
   { id: "1224356374", name: "Initial Outreach", count: 2, color: "#22c55e", group: "active" },
-  { id: "1224356375", name: "Followup Seq.", count: 10, color: "#14b8a6", group: "active" },
-  { id: "1224356377", name: "Won", count: 23, color: "#eab308", group: "won" },
-  { id: "1224356378", name: "Lost (Nurture)", count: 47, color: "#ef4444", group: "lost" },
-  { id: "1225118004", name: "Lost (No Resp.)", count: 113, color: "#dc2626", group: "lost" },
-  { id: "1244570040", name: "Lost (Disqual.)", count: 215, color: "#991b1b", group: "lost" },
+  { id: "1224356375", name: "Followup Seq.", count: 4, color: "#14b8a6", group: "active" },
+  { id: "1224356377", name: "Won", count: 23, color: "#FF5005", group: "won" },
+  { id: "1224356378", name: "Lost (Nurture)", count: 45, color: "#ef4444", group: "lost" },
+  { id: "1225118004", name: "Lost (No Resp.)", count: 137, color: "#dc2626", group: "lost" },
+  { id: "1244570040", name: "Lost (Disqual.)", count: 226, color: "#991b1b", group: "lost" },
 ];
 
 // Account Plannings from Granola
@@ -176,8 +175,8 @@ const ECOSYSTEM = {
 
 // Prioridades definidas por Nico — 1:1 del 7 abr
 const PRIORIDADES = [
-  { n: "1", label: "Campanas core + pipeline actualizado", color: "#3b82f6", detail: "Lost SQL + Nurture Stalled SQL. Enviar emails, trackear, reportar indices de respuesta." },
-  { n: "2", label: "Warm-up LinkedIn (piloto)", color: "#a855f7", detail: "Batch 3/semana, tier B/C. 4 etapas: identificar > follow > engage > connect." },
+  { n: "1", label: "Campanas core + pipeline actualizado", color: "#FF5005", detail: "Lost SQL + Nurture Stalled SQL. Enviar emails, trackear, reportar indices de respuesta." },
+  { n: "2", label: "Warm-up LinkedIn (piloto)", color: "#203B83", detail: "Batch 3/semana, tier B/C. 4 etapas: identificar > follow > engage > connect." },
   { n: "3", label: "CSAT / NPS agresivo", color: "#eab308", detail: "Multi-canal incl. WhatsApp. Meta: completar en 2 meses. Separar CSAT de NPS." },
   { n: "4", label: "Account Planning", color: "#22c55e", detail: "Santillana (jueves), REMAX (prox. semana). Mapeo relacional + oportunidades." },
 ];
@@ -196,12 +195,10 @@ const INITIAL_ACTIONS = [
 ];
 
 const ACTIVITY_FEED = [
-  { time: "20:15", action: "Santillana research completo", type: "deal", detail: "20 deals, 29 contactos, contexto Granola — listo para jueves" },
-  { time: "20:00", action: "Warm-up piloto configurado", type: "warmup", detail: "3 leads cargados en Asana: Naveed, Amanda, Lior" },
-  { time: "19:30", action: "Scheduled tasks creadas", type: "sync", detail: "Morning briefing (9:01), Pipeline sync (3x/dia), Weekly report (vie 17:00)" },
-  { time: "17:00", action: "Dashboard deployado", type: "sync", detail: "SDR Command Center v1 — data real de HubSpot" },
-  { time: "14:32", action: "Sync HubSpot completado", type: "sync", detail: "443 deals SDR procesados, 15 campanas mapeadas" },
-  { time: "10:30", action: "Reunion analizada", type: "meeting", detail: "[1:1] Franco/Nico — 4 prioridades definidas" },
+  { time: "15:35", action: "Pipeline refrescado", type: "sync", detail: "446 deals SDR actualizados desde HubSpot — 23 won, 6 activos, 408 lost, 9 en on review" },
+  { time: "15:30", action: "Dashboard redeployado", type: "sync", detail: "Aerolab aesthetic + data fresca del 20-abr" },
+  { time: "11:00", action: "Reporte mensual HTML", type: "sync", detail: "Generado sdr-report.html para Abril 2026 con 446 deals" },
+  { time: "abr 17", action: "Último sync previo", type: "sync", detail: "Dashboard había quedado en data del 17-abr — refresh manual requerido" },
 ];
 
 // ============================================================
@@ -210,11 +207,11 @@ const ACTIVITY_FEED = [
 
 function Badge({ text, variant = "gray" }) {
   const colors = {
-    blue: "bg-blue-500/15 text-blue-400",
+    blue: "bg-[#FF5005]/15 text-[#FF7A3C]",
     green: "bg-green-500/15 text-green-400",
     yellow: "bg-yellow-500/15 text-yellow-400",
     red: "bg-red-500/15 text-red-400",
-    purple: "bg-purple-500/15 text-purple-400",
+    purple: "bg-[#203B83]/25 text-[#7FA0DB]",
     orange: "bg-orange-500/15 text-orange-400",
     gray: "bg-zinc-500/10 text-zinc-400",
     hot: "bg-red-500/20 text-red-300",
@@ -229,7 +226,7 @@ function Badge({ text, variant = "gray" }) {
 
 function StatCard({ label, value, sub, color }) {
   return (
-    <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5 hover:bg-[#1f1f35] hover:border-[#3a3a4e] transition-all">
+    <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5 hover:bg-[#211D18] hover:border-[#3A342C] transition-all">
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{label}</span>
         <span className="w-2 h-2 rounded-full" style={{ background: color }} />
@@ -273,7 +270,7 @@ function CampaignTable({ campaigns }) {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-[#2a2a3e]">
+          <tr className="border-b border-[#2D2822]">
             <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Campana</th>
             <th className="text-center px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Total</th>
             <th className="text-center px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Activos</th>
@@ -291,14 +288,14 @@ function CampaignTable({ campaigns }) {
             const responded = Object.entries(c.stages).filter(([k]) => ["1224356375", "1224356376", "1225118002", "1225118003", "1224356377", "1275457612"].includes(k)).reduce((a, [, v]) => a + v, 0);
             const rate = c.total > 0 ? Math.round(((responded + won) / c.total) * 100) : 0;
             return (
-              <tr key={c.name} className="border-b border-[#2a2a3e]/50 hover:bg-white/[0.02] transition-colors">
+              <tr key={c.name} className="border-b border-[#2D2822]/50 hover:bg-white/[0.02] transition-colors">
                 <td className="px-4 py-3.5">
                   <div className="font-medium text-sm text-zinc-200">{c.name}</div>
                   <div className="text-xs text-zinc-500 mt-0.5 max-w-xs truncate">{c.description}</div>
                 </td>
                 <td className="px-4 py-3.5 text-sm text-zinc-300 text-center font-medium">{c.total}</td>
                 <td className="px-4 py-3.5 text-center">
-                  <span className={`text-sm font-medium ${active > 0 ? "text-blue-400" : "text-zinc-600"}`}>{active}</span>
+                  <span className={`text-sm font-medium ${active > 0 ? "text-[#FF7A3C]" : "text-zinc-600"}`}>{active}</span>
                 </td>
                 <td className="px-4 py-3.5 text-center">
                   <span className={`text-sm font-medium ${won > 0 ? "text-yellow-400" : "text-zinc-600"}`}>{won}</span>
@@ -319,11 +316,11 @@ function CampaignTable({ campaigns }) {
 }
 
 function ActivityFeed({ items }) {
-  const typeColors = { sync: "#3b82f6", email: "#a855f7", response: "#22c55e", deal: "#eab308", warmup: "#f97316", meeting: "#ec4899" };
+  const typeColors = { sync: "#FF5005", email: "#203B83", response: "#22c55e", deal: "#eab308", warmup: "#f97316", meeting: "#ec4899" };
   return (
     <div className="space-y-0">
       {items.map((item, i) => (
-        <div key={i} className="flex gap-3 py-3 border-b border-[#2a2a3e]/50 last:border-0">
+        <div key={i} className="flex gap-3 py-3 border-b border-[#2D2822]/50 last:border-0">
           <span className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: typeColors[item.type] || "#71717a" }} />
           <div className="flex-1 min-w-0">
             <div className="text-sm text-zinc-300">{item.action}</div>
@@ -354,14 +351,14 @@ function ActionPreview({ type, metadata }) {
     </div>
   );
 
-  if (type === "email") return wrapper("Preview — Email Draft", "#3b82f6",
+  if (type === "email") return wrapper("Preview — Email Draft", "#FF5005",
     empty
       ? <p className="text-xs text-zinc-600 italic">El draft se genera al ejecutar. Podés agregar instrucciones abajo para guiar el tono y contenido.</p>
       : <>
           {meta.to && <div className="text-xs"><span className="text-zinc-500">Para:</span> <span className="text-zinc-300 ml-1">{meta.to}</span></div>}
           {meta.from && <div className="text-xs"><span className="text-zinc-500">De:</span> <span className="text-zinc-300 ml-1">{meta.from}</span></div>}
           {meta.subject && <div className="text-xs"><span className="text-zinc-500">Asunto:</span> <span className="text-zinc-200 font-medium ml-1">{meta.subject}</span></div>}
-          {meta.body && <div className="mt-2 p-3 bg-[#12121a] rounded-lg text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed border-l-2 border-blue-500/40">{meta.body}</div>}
+          {meta.body && <div className="mt-2 p-3 bg-[#14110D] rounded-lg text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed border-l-2 border-[#FF5005]/45">{meta.body}</div>}
         </>
   );
 
@@ -373,7 +370,7 @@ function ActionPreview({ type, metadata }) {
           {meta.project && <div className="text-xs"><span className="text-zinc-500">Proyecto:</span> <span className="text-zinc-300 ml-1">{meta.project}</span></div>}
           {meta.assignee && <div className="text-xs"><span className="text-zinc-500">Asignado a:</span> <span className="text-zinc-300 ml-1">{meta.assignee}</span></div>}
           {meta.due_date && <div className="text-xs"><span className="text-zinc-500">Vencimiento:</span> <span className="text-zinc-300 ml-1">{meta.due_date}</span></div>}
-          {meta.notes && <div className="mt-2 p-2 bg-[#12121a] rounded text-xs text-zinc-400 leading-relaxed">{meta.notes}</div>}
+          {meta.notes && <div className="mt-2 p-2 bg-[#14110D] rounded text-xs text-zinc-400 leading-relaxed">{meta.notes}</div>}
         </>
   );
 
@@ -383,17 +380,17 @@ function ActionPreview({ type, metadata }) {
       : <>
           {meta.page_title && <div className="text-xs"><span className="text-zinc-500">Título:</span> <span className="text-zinc-200 font-medium ml-1">{meta.page_title}</span></div>}
           {meta.database && <div className="text-xs"><span className="text-zinc-500">Base de datos:</span> <span className="text-zinc-300 ml-1">{meta.database}</span></div>}
-          {meta.content && <div className="mt-2 p-2 bg-[#12121a] rounded text-xs text-zinc-400 whitespace-pre-wrap leading-relaxed">{meta.content.length > 400 ? meta.content.slice(0, 400) + "…" : meta.content}</div>}
+          {meta.content && <div className="mt-2 p-2 bg-[#14110D] rounded text-xs text-zinc-400 whitespace-pre-wrap leading-relaxed">{meta.content.length > 400 ? meta.content.slice(0, 400) + "…" : meta.content}</div>}
         </>
   );
 
-  if (type === "slack") return wrapper("Preview — Mensaje Slack", "#a855f7",
+  if (type === "slack") return wrapper("Preview — Mensaje Slack", "#203B83",
     empty
       ? <p className="text-xs text-zinc-600 italic">El mensaje se redacta al ejecutar. Podés indicar canal y tono en las instrucciones.</p>
       : <>
           {meta.channel && <div className="text-xs"><span className="text-zinc-500">Canal:</span> <span className="text-zinc-300 ml-1">#{meta.channel}</span></div>}
           {meta.to && <div className="text-xs"><span className="text-zinc-500">Para:</span> <span className="text-zinc-300 ml-1">@{meta.to}</span></div>}
-          {meta.message && <div className="mt-2 p-3 bg-[#1a1a2a] rounded-lg text-xs text-zinc-300 leading-relaxed border-l-[3px] border-purple-500/50">{meta.message}</div>}
+          {meta.message && <div className="mt-2 p-3 bg-[#1A1713] rounded-lg text-xs text-zinc-300 leading-relaxed border-l-[3px] border-[#203B83]/60">{meta.message}</div>}
         </>
   );
 
@@ -448,8 +445,8 @@ function DateFilterBar({ value, onChange }) {
         <button key={o.id} onClick={() => onChange(o.id)}
           className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
             value === o.id
-              ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-              : "text-zinc-500 border border-[#2a2a3e] hover:text-zinc-300 hover:border-zinc-600"
+              ? "bg-[#FF5005]/20 text-[#FF7A3C] border border-[#FF5005]/40"
+              : "text-zinc-500 border border-[#2D2822] hover:text-zinc-300 hover:border-zinc-600"
           }`}>
           {o.label}
         </button>
@@ -470,7 +467,7 @@ function ActionQueue({ actions, onApprove, onReject, onHold }) {
   return (
     <div className="space-y-3">
       {actions.map((a) => (
-        <div key={a.id} className={`bg-[#1a1a2e] border rounded-xl transition-all ${expanded === a.id ? "border-blue-500/40 shadow-lg shadow-blue-500/5" : "border-[#2a2a3e] hover:border-blue-500/20"}`}>
+        <div key={a.id} className={`bg-[#1A1713] border rounded-xl transition-all ${expanded === a.id ? "border-[#FF5005]/45 shadow-lg shadow-[#FF5005]/5" : "border-[#2D2822] hover:border-[#FF5005]/25"}`}>
           {/* Header row */}
           <div className="p-4 flex items-center gap-4 cursor-pointer" onClick={() => handleExpand(a.id)}>
             <span className="text-lg">{typeIcons[a.type] || "\u2022"}</span>
@@ -495,7 +492,7 @@ function ActionQueue({ actions, onApprove, onReject, onHold }) {
 
           {/* Expanded: preview + instructions panel */}
           {expanded === a.id && (
-            <div className="px-4 pb-4 border-t border-[#2a2a3e] pt-4 space-y-4">
+            <div className="px-4 pb-4 border-t border-[#2D2822] pt-4 space-y-4">
               {/* Output preview */}
               <ActionPreview type={a.type} metadata={a.metadata} />
 
@@ -506,7 +503,7 @@ function ActionQueue({ actions, onApprove, onReject, onHold }) {
                   value={instructions[a.id] || ""}
                   onChange={(e) => handleInstructionChange(a.id, e.target.value)}
                   placeholder="Ej: 'Usar tono informal, mencionar el caso de Santillana, enviar desde mi email...'"
-                  className="w-full bg-[#12121a] border border-[#2a2a3e] rounded-lg px-3 py-2 text-sm text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-blue-500/40 resize-none"
+                  className="w-full bg-[#14110D] border border-[#2D2822] rounded-lg px-3 py-2 text-sm text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-[#FF5005]/45 resize-none"
                   rows={2}
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -722,11 +719,14 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-[#2a2a3e]">
+      <header className="sticky top-0 z-50 bg-[#0F0D0A]/80 backdrop-blur-xl border-b border-[#2D2822]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold tracking-tight">SDR Command Center</h1>
-            <p className="text-xs text-zinc-500">Aerolab &middot; Franco Rodriguez</p>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#FF5005] flex items-center justify-center text-black font-black text-sm shadow-lg shadow-[#FF5005]/20">A</div>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight text-[#F9F7F1]">SDR Command Center</h1>
+              <p className="text-xs text-[#8A8276]">Aerolab &middot; Franco Rodriguez</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-xs text-zinc-500">
@@ -734,14 +734,14 @@ export default function Dashboard() {
               Sync: {lastSyncTime}
               {apiStatus === "connected" && <span className="ml-2 text-green-400">&middot; DB live</span>}
             </div>
-            <div className="text-xs text-zinc-600">443 deals SDR &middot; 15 campanas</div>
+            <div className="text-xs text-zinc-600">446 deals SDR &middot; 15 campanas</div>
             <a href="/graph"
-              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-500/15 text-purple-400 border border-purple-500/30 hover:bg-purple-500/25 transition-colors">
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#FF5005]/10 text-[#FF7A3C] border border-[#FF5005]/30 hover:bg-[#FF5005]/20 transition-colors">
               🧠 Ecosistema
             </a>
             {displayActions.length > 0 && (
               <button onClick={() => setActiveTab("actions")}
-                className="relative px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 transition-colors">
+                className="relative px-3 py-1.5 rounded-lg text-xs font-medium bg-[#FF5005]/15 text-[#FF7A3C] border border-[#FF5005]/40 hover:bg-[#FF5005]/25 transition-colors">
                 {displayActions.length} pendientes
               </button>
             )}
@@ -751,13 +751,13 @@ export default function Dashboard() {
 
       {/* Tab Nav */}
       <div className="max-w-7xl mx-auto px-6 pt-6">
-        <div className="flex gap-1 bg-[#12121a] rounded-xl p-1 border border-[#2a2a3e] overflow-x-auto">
+        <div className="flex gap-1 bg-[#14110D] rounded-xl p-1 border border-[#2D2822] overflow-x-auto">
           {TABS.map((tab) => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? "bg-[#1a1a2e] text-zinc-100 shadow-sm shadow-black/20" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"}`}>
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? "bg-[#1A1713] text-zinc-100 shadow-sm shadow-black/20" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"}`}>
               {tab.label}
               {tab.id === "actions" && displayActions.length > 0 && (
-                <span className="ml-2 px-1.5 py-0.5 rounded-full text-[10px] bg-blue-500/20 text-blue-400">{displayActions.length}</span>
+                <span className="ml-2 px-1.5 py-0.5 rounded-full text-[10px] bg-[#FF5005]/20 text-[#FF7A3C]">{displayActions.length}</span>
               )}
             </button>
           ))}
@@ -770,18 +770,18 @@ export default function Dashboard() {
         {activeTab === "overview" && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard label="Deals Totales SDR" value="443" sub={`${stats.active} activos · ${stats.won} ganados`} color="#3b82f6" />
-              <StatCard label="Campanas Activas" value="15" sub="Lost SQL + Nurture Stalled = prioridad" color="#a855f7" />
+              <StatCard label="Deals Totales SDR" value="446" sub={`${stats.active} activos · ${stats.won} ganados`} color="#FF5005" />
+              <StatCard label="Campanas Activas" value="15" sub="Lost SQL + Nurture Stalled = prioridad" color="#203B83" />
               <StatCard label="CSAT Completado" value={`${Math.round((stats.csatDone / stats.csatTotal) * 100)}%`} sub={`${stats.csatDone} de ${stats.csatTotal} respondidos`} color="#eab308" />
               <StatCard label="NPS Completado" value={`${Math.round((stats.npsDone / stats.npsTotal) * 100)}%`} sub={`${stats.npsDone} de ${stats.npsTotal} respondidos`} color="#22c55e" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+              <div className="lg:col-span-2 bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-zinc-300 mb-4">Pipeline SDR — Todos los stages</h3>
                 <PipelineBar stages={PIPELINE_STAGES_REAL} />
               </div>
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-zinc-300 mb-4">Prioridades (Nico — 7 abr)</h3>
                 <div className="space-y-3">
                   {PRIORIDADES.map((p) => (
@@ -798,40 +798,40 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-zinc-300">Top Campanas por Volumen</h3>
-                  <button onClick={() => setActiveTab("campaigns")} className="text-xs text-blue-400 hover:text-blue-300">Ver todas &rarr;</button>
+                  <button onClick={() => setActiveTab("campaigns")} className="text-xs text-[#FF7A3C] hover:text-[#FF9A63]">Ver todas &rarr;</button>
                 </div>
                 <div className="space-y-3">
                   {CAMPAIGNS_DATA.slice(0, 5).map((c) => (
-                    <div key={c.name} className="flex items-center justify-between py-2 border-b border-[#2a2a3e]/50 last:border-0">
+                    <div key={c.name} className="flex items-center justify-between py-2 border-b border-[#2D2822]/50 last:border-0">
                       <div>
                         <div className="text-sm text-zinc-200">{c.name}</div>
                         <div className="text-xs text-zinc-500">{c.total} deals</div>
                       </div>
                       <div className="w-24 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(c.total / 133) * 100}%` }} />
+                        <div className="h-full bg-[#FF5005] rounded-full" style={{ width: `${(c.total / 141) * 100}%` }} />
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-zinc-300 mb-4">Actividad Reciente</h3>
                 <ActivityFeed items={displayActivity} />
               </div>
             </div>
 
             {displayActions.length > 0 && (
-              <div className="bg-[#1a1a2e] border border-blue-500/20 rounded-xl p-5">
+              <div className="bg-[#1A1713] border border-[#FF5005]/25 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-zinc-300">
                     Acciones Pendientes
-                    <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] bg-blue-500/20 text-blue-400">{displayActions.length}</span>
+                    <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] bg-[#FF5005]/20 text-[#FF7A3C]">{displayActions.length}</span>
                   </h3>
-                  <button onClick={() => setActiveTab("actions")} className="text-xs text-blue-400 hover:text-blue-300">Gestionar &rarr;</button>
+                  <button onClick={() => setActiveTab("actions")} className="text-xs text-[#FF7A3C] hover:text-[#FFB088]">Gestionar &rarr;</button>
                 </div>
                 <ActionQueue actions={displayActions.slice(0, 3)} onApprove={handleApprove} onReject={handleReject} />
               </div>
@@ -846,7 +846,7 @@ export default function Dashboard() {
 
           const STATUS_CONFIG = {
             "In Progress": { color: "#22c55e", bg: "bg-green-500/15", text: "text-green-400", border: "border-green-500/20", dot: "#22c55e" },
-            "Planning":    { color: "#3b82f6", bg: "bg-blue-500/15",  text: "text-blue-400",  border: "border-blue-500/20",  dot: "#3b82f6" },
+            "Planning":    { color: "#FF5005", bg: "bg-[#FF5005]/15",  text: "text-[#FF7A3C]",  border: "border-[#FF5005]/25",  dot: "#FF5005" },
             "On Hold":     { color: "#f97316", bg: "bg-orange-500/15",text: "text-orange-400",border: "border-orange-500/20",dot: "#f97316" },
             "Not Started": { color: "#71717a", bg: "bg-zinc-500/10",  text: "text-zinc-500",  border: "border-zinc-700",     dot: "#71717a" },
             "Completed":   { color: "#eab308", bg: "bg-yellow-500/15",text: "text-yellow-400",border: "border-yellow-500/20",dot: "#eab308" },
@@ -881,14 +881,14 @@ export default function Dashboard() {
               <div className="flex items-center gap-2 flex-wrap">
                 <DateFilterBar value={emailsDateFilter} onChange={setEmailsDateFilter} />
                 <a href="https://app.asana.com/1/333378374105320/project/1213364902097317" target="_blank" rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 transition-colors">
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#203B83]/20 text-[#7FA0DB] border border-[#203B83]/40 hover:bg-[#203B83]/30 transition-colors">
                   ↗ Abrir en Asana
                 </a>
               </div>
             </div>
 
             {campaigns.length === 0 ? (
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-12 text-center">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-12 text-center">
                 <div className="text-2xl mb-2">🔄</div>
                 <div className="text-zinc-300">Cargando campañas desde Asana...</div>
               </div>
@@ -902,7 +902,7 @@ export default function Dashboard() {
                     { label: "En Pausa",    status: "On Hold",      cfg: STATUS_CONFIG["On Hold"] },
                     { label: "Completadas", status: "Completed",    cfg: STATUS_CONFIG["Completed"] },
                   ].map(({ label, status, cfg }) => (
-                    <div key={status} className={`bg-[#1a1a2e] border rounded-xl p-4 text-center ${cfg.border}`}>
+                    <div key={status} className={`bg-[#1A1713] border rounded-xl p-4 text-center ${cfg.border}`}>
                       <div className={`text-3xl font-bold ${cfg.text}`}>
                         {emailsDateFilter === "total" ? countByStatus(status) : filteredCountByStatus(status)}
                       </div>
@@ -916,7 +916,7 @@ export default function Dashboard() {
                   {filtered.map((c) => {
                     const cfg = STATUS_CONFIG[c.status] || STATUS_CONFIG["Not Started"];
                     return (
-                      <div key={c.id} className={`bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5 hover:border-zinc-600 transition-colors`}>
+                      <div key={c.id} className={`bg-[#1A1713] border border-[#2D2822] rounded-xl p-5 hover:border-zinc-600 transition-colors`}>
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -944,13 +944,13 @@ export default function Dashboard() {
                           </div>
                         )}
                         {c.cta && (
-                          <div className="mb-2 p-2 bg-blue-500/5 border border-blue-500/10 rounded-lg">
-                            <span className="text-[10px] text-blue-400 uppercase tracking-wider">CTA · </span>
+                          <div className="mb-2 p-2 bg-[#FF5005]/5 border border-[#FF5005]/15 rounded-lg">
+                            <span className="text-[10px] text-[#FF7A3C] uppercase tracking-wider">CTA · </span>
                             <span className="text-xs text-zinc-400 italic">"{c.cta.slice(0, 100)}{c.cta.length > 100 ? '…' : ''}"</span>
                           </div>
                         )}
 
-                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#2a2a3e]">
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#2D2822]">
                           {c.due_on && (
                             <span className="text-xs text-zinc-600">
                               📅 {new Date(c.due_on).toLocaleDateString("es-AR", { day:"2-digit", month:"short", year:"numeric" })}
@@ -966,14 +966,14 @@ export default function Dashboard() {
                 </div>
 
                 {filtered.length === 0 && (
-                  <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-10 text-center">
+                  <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-10 text-center">
                     <div className="text-zinc-500">Sin campañas en {periodLabel}</div>
                   </div>
                 )}
               </>
             )}
 
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+            <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-zinc-300 mb-3">Insight de Response Rate</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-3 bg-green-500/5 border border-green-500/10 rounded-lg">
@@ -1011,7 +1011,7 @@ export default function Dashboard() {
             "30d":  { active: 12, won: 0,  lost: 0,   note: "deals en outreach activo ahora mismo" },
             "mes":  { active: 12, won: 0,  lost: 0,   pre: 33, note: "deals en pipeline activo (pre-outreach + outreach)" },
             "3m":   { active: 12, won: 23, lost: 0,   pre: 33, note: "deals con señales positivas (sin contar lost)" },
-            "total":{ active: 45, won: 23, lost: 375, note: "443 deals históricos en el pipeline SDR" },
+            "total":{ active: 42, won: 23, lost: 381, note: "446 deals históricos en el pipeline SDR" },
           };
           const summary = summaryByFilter[dealsDateFilter];
           const periodLabel = { "30d": "Últ. 30 días", "mes": "Mes corriente", "3m": "Últ. 3 meses", "total": "Total histórico" }[dealsDateFilter];
@@ -1028,25 +1028,25 @@ export default function Dashboard() {
 
             {/* Summary stat cards — change per filter */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-[#1a1a2e] border border-blue-500/20 rounded-xl p-4 text-center">
-                <div className="text-3xl font-bold text-blue-400">{visibleTotal}</div>
+              <div className="bg-[#1A1713] border border-[#FF5005]/25 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-[#FF7A3C]">{visibleTotal}</div>
                 <div className="text-xs text-zinc-500 mt-1">Deals en vista</div>
               </div>
-              <div className="bg-[#1a1a2e] border border-green-500/20 rounded-xl p-4 text-center">
+              <div className="bg-[#1A1713] border border-green-500/20 rounded-xl p-4 text-center">
                 <div className="text-3xl font-bold text-green-400">{visibleStages.filter(s=>s.group==="active").reduce((s,st)=>s+st.count,0)}</div>
                 <div className="text-xs text-zinc-500 mt-1">En outreach activo</div>
               </div>
-              <div className="bg-[#1a1a2e] border border-yellow-500/20 rounded-xl p-4 text-center">
+              <div className="bg-[#1A1713] border border-yellow-500/20 rounded-xl p-4 text-center">
                 <div className="text-3xl font-bold text-yellow-400">{visibleStages.filter(s=>s.group==="won").reduce((s,st)=>s+st.count,0)}</div>
                 <div className="text-xs text-zinc-500 mt-1">Won</div>
               </div>
-              <div className="bg-[#1a1a2e] border border-red-500/20 rounded-xl p-4 text-center">
+              <div className="bg-[#1A1713] border border-red-500/20 rounded-xl p-4 text-center">
                 <div className="text-3xl font-bold text-red-400">{visibleStages.filter(s=>s.group==="lost").reduce((s,st)=>s+st.count,0)}</div>
                 <div className="text-xs text-zinc-500 mt-1">Lost</div>
               </div>
             </div>
 
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+            <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-zinc-300 mb-1">Distribución por Stage</h3>
               <p className="text-xs text-zinc-600 mb-4">{summary.note}</p>
               <PipelineBar stages={visibleStages} />
@@ -1054,7 +1054,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {visibleStages.map((s) => (
-                <div key={s.id} className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-4">
+                <div key={s.id} className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-3 h-3 rounded" style={{ background: s.color }} />
                     <span className="text-sm font-medium text-zinc-300">{s.name}</span>
@@ -1076,21 +1076,21 @@ export default function Dashboard() {
               <Badge text="Piloto Activo — 3 Leads" variant="purple" />
             </div>
 
-            <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-purple-300 mb-3">Estado del Piloto</h3>
+            <div className="bg-[#203B83]/10 border border-[#203B83]/40 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-[#A8C1E8] mb-3">Estado del Piloto</h3>
               <p className="text-sm text-zinc-400 mb-4">
                 Batch 1 cargado: 3 leads tier A en etapa Identificar. Cada SDR tiene 1 lead asignado. Proximo paso: follow en LinkedIn. Aprobacion manual en cada etapa.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-6 gap-3">
                 {[
-                  { stage: "Identificar", count: 3, color: "text-purple-400" },
-                  { stage: "Follow", count: 0, color: "text-blue-400" },
+                  { stage: "Identificar", count: 3, color: "text-[#7FA0DB]" },
+                  { stage: "Follow", count: 0, color: "text-[#FF7A3C]" },
                   { stage: "Engage", count: 0, color: "text-cyan-400" },
                   { stage: "Connect", count: 0, color: "text-green-400" },
                   { stage: "Ready", count: 0, color: "text-yellow-400" },
                   { stage: "Outreach", count: 0, color: "text-orange-400" },
                 ].map(({stage, count, color}) => (
-                  <div key={stage} className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-3 text-center">
+                  <div key={stage} className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-3 text-center">
                     <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{stage}</div>
                     <div className={`text-2xl font-bold ${count > 0 ? color : "text-zinc-700"}`}>{count}</div>
                   </div>
@@ -1105,7 +1105,7 @@ export default function Dashboard() {
                 { name: "Amanda Zhu", title: "Co-Founder @ Recall AI", linkedin: "linkedin.com/in/amandazhu", assignee: "Nicolas", stage: "Identificar", angle: "Recall AI competes with Gong/Fireflies. API-first brand needs trust + sophistication.", likes: 0, comments: 0, connected: false },
                 { name: "Lior Alexander", title: "Founder @ Alpha Signal", linkedin: "linkedin.com/in/lioralexander", assignee: "Roberto", stage: "Identificar", angle: "500K subs, 7 cifras revenue. Web no refleja nivel de audiencia. Premium brand upgrade.", likes: 0, comments: 0, connected: false },
               ].map((lead) => (
-                <div key={lead.name} className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+                <div key={lead.name} className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <span className="text-base font-semibold text-zinc-200">{lead.name}</span>
@@ -1127,7 +1127,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+            <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-zinc-300 mb-3">Configuracion del Piloto</h3>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm text-zinc-400">
                 <div><span className="text-zinc-500 block text-xs uppercase mb-1">Batch semanal</span> 3 personas</div>
@@ -1148,7 +1148,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                 <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">CSAT</div>
                 <div className="flex items-end gap-2">
                   <span className="text-3xl font-bold text-yellow-400">{stats.csatDone}</span>
@@ -1163,14 +1163,14 @@ export default function Dashboard() {
                   <div>Lost: {CAMPAIGNS_DATA.find(c => c.name === "CSAT")?.stages["1244570040"] || 0} &middot; Research: {CAMPAIGNS_DATA.find(c => c.name === "CSAT")?.stages["1224356373"] || 0}</div>
                 </div>
               </div>
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                 <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">NPS</div>
                 <div className="flex items-end gap-2">
-                  <span className="text-3xl font-bold text-purple-400">{stats.npsDone}</span>
+                  <span className="text-3xl font-bold text-[#7FA0DB]">{stats.npsDone}</span>
                   <span className="text-sm text-zinc-500 mb-1">/ {stats.npsTotal} respondidos</span>
                 </div>
                 <div className="mt-3 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-500 rounded-full" style={{ width: `${(stats.npsDone / stats.npsTotal) * 100}%` }} />
+                  <div className="h-full bg-[#203B83] rounded-full" style={{ width: `${(stats.npsDone / stats.npsTotal) * 100}%` }} />
                 </div>
                 <div className="text-xs text-zinc-500 mt-2">{Math.round((stats.npsDone / stats.npsTotal) * 100)}% completado</div>
                 <div className="mt-3 text-xs text-zinc-400">
@@ -1180,11 +1180,11 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+            <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-zinc-300 mb-3">Estrategia de Seguimiento</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3 bg-blue-500/5 border border-blue-500/10 rounded-lg">
-                  <div className="text-sm font-medium text-blue-400 mb-1">Canal primario: Email</div>
+                <div className="p-3 bg-[#FF5005]/5 border border-[#FF5005]/15 rounded-lg">
+                  <div className="text-sm font-medium text-[#FF7A3C] mb-1">Canal primario: Email</div>
                   <div className="text-xs text-zinc-500">Primer y segundo intento via email. Sweet spot 31-75 palabras.</div>
                 </div>
                 <div className="p-3 bg-green-500/5 border border-green-500/10 rounded-lg">
@@ -1203,7 +1203,7 @@ export default function Dashboard() {
               <h2 className="text-lg font-semibold">Account Planning</h2>
               <div className="flex gap-2">
                 {ACCOUNT_PLANNINGS.map((ap, i) => (
-                  <button key={i} onClick={() => setPlanningView(ap.company)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${planningView === ap.company ? "bg-blue-500/20 text-blue-300 border border-blue-500/30" : "bg-zinc-800 text-zinc-400 border border-transparent hover:border-[#2a2a3e]"}`}>
+                  <button key={i} onClick={() => setPlanningView(ap.company)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${planningView === ap.company ? "bg-[#FF5005]/20 text-[#FFB088] border border-[#FF5005]/40" : "bg-zinc-800 text-zinc-400 border border-transparent hover:border-[#2D2822]"}`}>
                     {ap.company} <span className="ml-1 opacity-60">{ap.date}</span>
                   </button>
                 ))}
@@ -1214,7 +1214,7 @@ export default function Dashboard() {
             {planningView === "Santillana" && (
               <div className="space-y-5">
                 {/* Company Header */}
-                <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+                <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <span className="text-xl font-bold text-zinc-100">{SANTILLANA.company.name}</span>
@@ -1228,16 +1228,16 @@ export default function Dashboard() {
                   </div>
                   <p className="text-sm text-zinc-400 mb-4">{SANTILLANA.company.description}</p>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-[#12121a] rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-blue-400">{SANTILLANA.deals.total}</div>
+                    <div className="bg-[#14110D] rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-[#FF7A3C]">{SANTILLANA.deals.total}</div>
                       <div className="text-xs text-zinc-500">Deals totales</div>
                     </div>
-                    <div className="bg-[#12121a] rounded-lg p-3 text-center">
+                    <div className="bg-[#14110D] rounded-lg p-3 text-center">
                       <div className="text-2xl font-bold text-green-400">{SANTILLANA.deals.totalRevenue}</div>
                       <div className="text-xs text-zinc-500">Revenue total</div>
                     </div>
-                    <div className="bg-[#12121a] rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-purple-400">{SANTILLANA.keyContacts.length}</div>
+                    <div className="bg-[#14110D] rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-[#7FA0DB]">{SANTILLANA.keyContacts.length}</div>
                       <div className="text-xs text-zinc-500">Contactos mapeados</div>
                     </div>
                   </div>
@@ -1275,11 +1275,11 @@ export default function Dashboard() {
                 {/* Deals Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                   {/* Active Deals */}
-                  <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+                  <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                     <h3 className="text-sm font-semibold text-zinc-300 mb-3">Deals Activos</h3>
                     <div className="space-y-2">
                       {SANTILLANA.deals.active.map((d, i) => (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-[#2a2a3e]/50 last:border-0">
+                        <div key={i} className="flex items-center justify-between py-2 border-b border-[#2D2822]/50 last:border-0">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm text-zinc-200 truncate">{d.name}</div>
                             <div className="flex gap-2 mt-0.5">
@@ -1298,11 +1298,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* Won Deals */}
-                  <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+                  <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                     <h3 className="text-sm font-semibold text-zinc-300 mb-3">Deals Ganados</h3>
                     <div className="space-y-2">
                       {SANTILLANA.deals.won.map((d, i) => (
-                        <div key={i} className="flex items-center justify-between py-2 border-b border-[#2a2a3e]/50 last:border-0">
+                        <div key={i} className="flex items-center justify-between py-2 border-b border-[#2D2822]/50 last:border-0">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm text-zinc-200 truncate">{d.name}</div>
                             <div className="text-xs text-zinc-500">{d.closedAt}</div>
@@ -1311,7 +1311,7 @@ export default function Dashboard() {
                         </div>
                       ))}
                     </div>
-                    <div className="mt-3 pt-3 border-t border-[#2a2a3e]">
+                    <div className="mt-3 pt-3 border-t border-[#2D2822]">
                       <h4 className="text-xs text-red-400/80 mb-2">Deals Perdidos</h4>
                       {SANTILLANA.deals.lost.map((d, i) => (
                         <div key={i} className="flex items-center justify-between py-1.5">
@@ -1324,11 +1324,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* Key Contacts — Org Chart Style */}
-                <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+                <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                   <h3 className="text-sm font-semibold text-zinc-300 mb-4">Contactos Clave ({SANTILLANA.keyContacts.length} mapeados)</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {SANTILLANA.keyContacts.map((c, i) => (
-                      <div key={i} className={`rounded-lg p-3 border ${c.tier === "hot" ? "bg-red-500/5 border-red-500/20" : c.tier === "warm" ? "bg-orange-500/5 border-orange-500/15" : "bg-zinc-800/30 border-[#2a2a3e]"}`}>
+                      <div key={i} className={`rounded-lg p-3 border ${c.tier === "hot" ? "bg-red-500/5 border-red-500/20" : c.tier === "warm" ? "bg-orange-500/5 border-orange-500/15" : "bg-zinc-800/30 border-[#2D2822]"}`}>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm font-medium text-zinc-200">{c.name}</span>
                           <Badge text={c.tier} variant={c.tier === "hot" ? "hot" : c.tier === "warm" ? "warm" : "gray"} />
@@ -1344,11 +1344,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* SDR History */}
-                <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+                <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                   <h3 className="text-sm font-semibold text-zinc-300 mb-3">Historial SDR</h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead><tr className="text-xs text-zinc-500 border-b border-[#2a2a3e]">
+                      <thead><tr className="text-xs text-zinc-500 border-b border-[#2D2822]">
                         <th className="text-left py-2 font-medium">Deal</th>
                         <th className="text-left py-2 font-medium">Contacto</th>
                         <th className="text-left py-2 font-medium">Campana</th>
@@ -1356,7 +1356,7 @@ export default function Dashboard() {
                       </tr></thead>
                       <tbody>
                         {SANTILLANA.sdrDeals.map((d, i) => (
-                          <tr key={i} className="border-b border-[#2a2a3e]/30">
+                          <tr key={i} className="border-b border-[#2D2822]/30">
                             <td className="py-2 text-zinc-300">{d.name}</td>
                             <td className="py-2 text-zinc-400">{d.contact}</td>
                             <td className="py-2"><Badge text={d.outreach} variant={d.outreach === "NPS" ? "yellow" : d.outreach === "Lost SQL" ? "red" : "gray"} /></td>
@@ -1369,11 +1369,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* Reuniones Recientes */}
-                <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+                <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                   <h3 className="text-sm font-semibold text-zinc-300 mb-4">Reuniones Recientes (Granola)</h3>
                   <div className="space-y-3">
                     {MEETINGS.map((m) => (
-                      <div key={m.id} className="flex items-center justify-between py-2 border-b border-[#2a2a3e]/50 last:border-0">
+                      <div key={m.id} className="flex items-center justify-between py-2 border-b border-[#2D2822]/50 last:border-0">
                         <div>
                           <div className="text-sm text-zinc-200">{m.title}</div>
                           <div className="text-xs text-zinc-500">{m.participants}</div>
@@ -1388,7 +1388,7 @@ export default function Dashboard() {
 
             {/* === REMAX Placeholder === */}
             {planningView === "REMAX" && (
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-8 text-center">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-8 text-center">
                 <div className="text-4xl mb-3">🏠</div>
                 <h3 className="text-lg font-semibold text-zinc-200 mb-2">REMAX — Account Planning</h3>
                 <p className="text-sm text-zinc-400 mb-4">Semana del 14 de abril. Research pendiente.</p>
@@ -1415,7 +1415,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+            <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-zinc-300 mb-4">{ECOSYSTEM.org}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
@@ -1439,7 +1439,7 @@ export default function Dashboard() {
                   <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Deals</h4>
                   <div className="space-y-2">
                     {ECOSYSTEM.deals.map((d) => (
-                      <div key={d.name} className="flex items-center justify-between py-2 border-b border-[#2a2a3e]/50">
+                      <div key={d.name} className="flex items-center justify-between py-2 border-b border-[#2D2822]/50">
                         <span className="text-sm text-zinc-300">{d.name}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-green-400">{d.amount}</span>
@@ -1452,7 +1452,7 @@ export default function Dashboard() {
                   <h4 className="text-xs text-zinc-500 uppercase tracking-wider mt-6 mb-3">Oportunidades Detectadas</h4>
                   <div className="space-y-2">
                     {ECOSYSTEM.opportunities.map((o) => (
-                      <div key={o.name} className="flex items-center justify-between py-2 border-b border-[#2a2a3e]/50">
+                      <div key={o.name} className="flex items-center justify-between py-2 border-b border-[#2D2822]/50">
                         <span className="text-sm text-zinc-300">{o.name}</span>
                         <span className="text-xs text-zinc-500">{o.champion}</span>
                       </div>
@@ -1461,11 +1461,11 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-[#2a2a3e]">
+              <div className="mt-6 pt-4 border-t border-[#2D2822]">
                 <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Equipo Aerolab Conectado</h4>
                 <div className="flex flex-wrap gap-2">
                   {ECOSYSTEM.aeroTeam.map((t) => (
-                    <span key={t.name} className="px-3 py-1.5 rounded-lg bg-blue-500/10 text-xs text-blue-400 border border-blue-500/20">
+                    <span key={t.name} className="px-3 py-1.5 rounded-lg bg-[#FF5005]/10 text-xs text-[#FF7A3C] border border-[#FF5005]/25">
                       {t.name} &middot; {t.title}
                     </span>
                   ))}
@@ -1473,8 +1473,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-blue-300 mb-2">Roadmap del Grafo</h3>
+            <div className="bg-[#FF5005]/5 border border-[#FF5005]/25 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-[#FFB088] mb-2">Roadmap del Grafo</h3>
               <p className="text-sm text-zinc-400">Actualmente 1 org mapeada (Kauffman Fellows). Proximo paso: agregar Santillana (pre Account Planning del jueves) y REMAX. El grafo se expande con cada cuenta que se mapea.</p>
             </div>
           </div>
@@ -1493,7 +1493,7 @@ export default function Dashboard() {
             {displayActions.length > 0 ? (
               <ActionQueue actions={displayActions} onApprove={handleApprove} onReject={handleReject} onHold={handleHold} />
             ) : (
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-12 text-center">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-12 text-center">
                 <div className="text-2xl mb-2">&#10003;</div>
                 <div className="text-zinc-300 font-medium">Todo al dia</div>
                 <div className="text-sm text-zinc-500 mt-1">No hay acciones pendientes de aprobacion</div>
@@ -1511,7 +1511,7 @@ export default function Dashboard() {
                         <div className="text-sm text-zinc-200">{a.action}</div>
                         <div className="text-xs text-zinc-500">{a.target}</div>
                         {a.instructions && (
-                          <div className="mt-1.5 px-2 py-1 bg-[#12121a] rounded text-xs text-blue-300 border-l-2 border-blue-500/40">
+                          <div className="mt-1.5 px-2 py-1 bg-[#14110D] rounded text-xs text-[#FFB088] border-l-2 border-[#FF5005]/45">
                             {a.instructions}
                           </div>
                         )}
@@ -1540,14 +1540,14 @@ export default function Dashboard() {
                         <div className="text-sm text-zinc-200">{a.action}</div>
                         <div className="text-xs text-zinc-500">{a.target}</div>
                         {a.instructions && (
-                          <div className="mt-1.5 px-2 py-1 bg-[#12121a] rounded text-xs text-orange-300 border-l-2 border-orange-500/40">
+                          <div className="mt-1.5 px-2 py-1 bg-[#14110D] rounded text-xs text-orange-300 border-l-2 border-orange-500/40">
                             {a.instructions}
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-2 ml-3">
                         <Badge text="hold" variant="yellow" />
-                        <button onClick={() => handleUnhold(a.id)} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors">
+                        <button onClick={() => handleUnhold(a.id)} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#FF5005]/10 text-[#FF7A3C] border border-[#FF5005]/25 hover:bg-[#FF5005]/20 transition-colors">
                           Reactivar
                         </button>
                       </div>
@@ -1560,11 +1560,11 @@ export default function Dashboard() {
 
             {/* Completed actions from DB */}
             {dbActions?.completed?.length > 0 && (
-              <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-5">
+              <div className="bg-[#1A1713] border border-[#2D2822] rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-zinc-300 mb-3">Completadas Recientes</h3>
                 <div className="space-y-2">
                   {dbActions.completed.slice(0, 10).map((a) => (
-                    <div key={a.id} className="flex items-start justify-between py-2 border-b border-[#2a2a3e]/30 last:border-0">
+                    <div key={a.id} className="flex items-start justify-between py-2 border-b border-[#2D2822]/30 last:border-0">
                       <div className="flex-1">
                         <div className="text-sm text-zinc-400 line-through">{a.action}</div>
                         <div className="text-xs text-zinc-600">{a.target}</div>
@@ -1581,10 +1581,10 @@ export default function Dashboard() {
         )}
       </main>
 
-      <footer className="border-t border-[#2a2a3e] mt-8">
+      <footer className="border-t border-[#2D2822] mt-8">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <span className="text-xs text-zinc-600">SDR Command Center v1.0 &middot; Powered by Claude + Aerolab</span>
-          <span className="text-xs text-zinc-600">Data: HubSpot (443 deals) &middot; Granola (4 meetings) &middot; Ecosystem (32 people)</span>
+          <span className="text-xs text-zinc-600">Data: HubSpot (446 deals) &middot; Granola (4 meetings) &middot; Ecosystem (32 people)</span>
         </div>
       </footer>
     </div>
